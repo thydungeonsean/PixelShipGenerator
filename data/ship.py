@@ -33,9 +33,9 @@ class Ship(object):
 
     def set_frame(self):
 
-        # return Frame.rand_premade(self)
+        return Frame.rand_premade(self)
         # return Frame.preselected(self, 'talon')
-        return Frame.random(self)
+        # return Frame.random(self)
 
     def get_image(self):
 

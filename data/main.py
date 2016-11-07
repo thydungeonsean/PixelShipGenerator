@@ -14,6 +14,7 @@ class Main(object):
         self.screen = pygame.display.get_surface()
         self.clock = pygame.time.Clock()
         self.end = False
+        self.state = None
 
     def handle_input(self):
 
@@ -25,18 +26,18 @@ class Main(object):
                 if event.key == K_ESCAPE:
                     self.end = True
 
-    def draw(self, i, r):
-        self.screen.blit(i, r)
+    def draw(self):
+
+        self.state.draw(self.screen)
 
     # main loop for the generator
     def main(self):
 
-        s = gen.Generator.generate_ship()
-        i, r = s.get_image()
+        self.state = gen.Generator()
 
         while not self.end:
             self.handle_input()
-            self.draw(i, r)
+            self.draw()
             self.clock.tick(FPS)
             pygame.display.update()
 
