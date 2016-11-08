@@ -1,5 +1,5 @@
 from constants import *
-from ship import Ship
+from ship.ship import Ship
 
 
 class Generator(object):

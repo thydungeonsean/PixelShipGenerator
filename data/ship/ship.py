@@ -1,6 +1,6 @@
 import pygame
 from random import *
-from constants import *
+from ..constants import *
 from frame import Frame
 
 
@@ -9,6 +9,12 @@ class Ship(object):
     """ The ship object is instantiated by generator.
     It holds a 2d list of the pixels of the ship and returns
     an image of the ship
+
+    Map:
+    0 - blank, not part of ship
+    -1 - black, part of ship, but to show texture
+    1 - colored pixel
+
     """
 
     @staticmethod
@@ -36,6 +42,19 @@ class Ship(object):
         return Frame.rand_premade(self)
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
+
+    def pixel_on_map(self, (x, y)):
+
+        if 0 <= x < self.w and 0 <= y < self.h:
+            return True
+        else:
+            return False
+
+    def change_pixel(self, (x, y), value):
+
+        if self.pixel_on_map((x, y)):
+            if value != 0:
+                self.map[x][y] = value
 
     def get_image(self):
 
