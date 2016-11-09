@@ -4,9 +4,6 @@ from constants import FPS
 import generator as gen
 from ship.components.basic_hull import *
 
-d = Diamond((0, 0), (10, 10))
-d.print_map()
-
 
 class Main(object):
     

@@ -9,14 +9,16 @@ class Component(object):
     """
 
     def __init__(self, (x, y), (w, h), autocreate=True, autooutline=True):
-        
-        self.map = [[0 for y in range(h)] for x in range(w)]
+
         self.w = w
         self.h = h
         
         self.x = x
-        print str(x) + 'is the x'
         self.y = y
+        
+        # maybe this is the problem - had x and y as var names for list builder
+        # and they were before assigning proper attributes - renamed mx, my
+        self.map = [[0 for my in range(h)] for mx in range(w)]
         
         self.points = set()
 
@@ -28,7 +30,64 @@ class Component(object):
     def create(self):
         pass
 
-    def outline(self):
+    def add_pixel(self, (x, y), value=1):
+
+        self.map[x][y] = value
+        self.points.add((x, y))
+
+    def outline(self, trim=False):
+    
+        outline = set()
+        for x, y in self.points:
+
+            if y == 0 or y == self.h-1 or x == 0 or x == self.w-1:
+                outline.add((x, y))
+                continue
+
+            adj = self.get_adj((x, y))
+            for ax, ay in adj:
+                if self.map[ax][ay] == 0:
+                    outline.add((x, y))
+                    break
+                    
+        for px, py in outline:
+            self.map[px][py] = -1
+
+        if trim:
+            self.trim_outline(outline)
+
+    def trim_outline(self, outline):
+
+        trim = set()
+
+        for x, y in outline:
+            adj = self.get_adj((x, y))
+            next_to_pixel = False
+            for ax, ay in adj:
+                if self.map[ax][ay] == 1:
+                    next_to_pixel = True
+                    break
+            if not next_to_pixel:
+                trim.add((x, y))
+
+        for tx, ty in trim:
+            self.map[tx][ty] = 0
+            self.points.remove((tx, ty))
+ 
+    def get_adj(self, (x, y)):
+
+        raw_adj = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+        adj = set()
+        for p in raw_adj:
+            if self.is_on_map(p):
+                adj.add(p)
+
+        return adj
+       
+    ##################################################################
+    # realized this floodfill to outline was needlessly complicated
+    # and would also fail to outline internal details
+    def flood_outline(self):
 
         # flood fill from edge of map to set a border or black
         # around component
@@ -56,16 +115,20 @@ class Component(object):
                 if p not in seen:
                     edge.add(p)
         return edge
+        
+    def get_edge_set(self):
 
-    def get_adj(self, (x, y)):
+        edge = set()
 
-        raw_adj = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-        adj = set()
-        for p in raw_adj:
-            if self.is_on_map(p):
-                adj.add(p)
+        for y in range(self.h):
+            for x in range(self.w):
+                if y == 0 or y == self.h - 1:
+                    edge.add((x, y))
+                elif x == 0 or x == self.w - 1:
+                    edge.add((x, y))
 
-        return adj
+        return edge
+    ####################################################################
 
     def is_on_map(self, (x, y)):
 
@@ -88,19 +151,6 @@ class Component(object):
                 line += new
             print line
 
-    def get_edge_set(self):
-
-        edge = set()
-
-        for y in range(self.h):
-            for x in range(self.w):
-                if y == 0 or y == self.h - 1:
-                    edge.add((x, y))
-                elif x == 0 or x == self.w - 1:
-                    edge.add((x, y))
-
-        return edge
-
     # adds a component object's map to current map
     def add(self, component):
 
@@ -109,15 +159,13 @@ class Component(object):
         w = component.w
         h = component.h
 
-        print 'component stats'
-        print sx, sy, w, h
         for y in range(h):
             for x in range(w):
                 mx = sx + x
                 my = sy + y
                 c_value = component.map[x][y]
                 if c_value != 0:
-                    self.map[mx][my] = c_value
+                    self.add_pixel((mx, my), value=c_value)
 
     def attach(self, ship):
         
@@ -128,3 +176,9 @@ class Component(object):
             
     def place(self):
         pass
+        # select a start position on ship map
+        # check if attached
+        # check if not overlapping
+        # if those pass, check if in frame
+        # needs methods to move position intelligently to meet conditions
+

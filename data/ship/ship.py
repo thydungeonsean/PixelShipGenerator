@@ -37,6 +37,8 @@ class Ship(object):
         self.show_frame()
         self.show_spine()
 
+        self.image, self.rect = self.set_image()
+
     def set_frame(self):
 
         return Frame.rand_premade(self)
@@ -56,7 +58,7 @@ class Ship(object):
             if value != 0:
                 self.map[x][y] = value
 
-    def get_image(self):
+    def set_image(self):
 
         image = pygame.Surface((self.w, self.h))
         image.fill(BLACK)
@@ -72,6 +74,11 @@ class Ship(object):
         rect = image.get_rect()
 
         return image, rect
+
+    def get_image(self):
+
+        return self.image, self.rect
+
 
     # TODO make a real capability to display the frame.
     # This one would destroy data from the ship if called.
@@ -99,3 +106,18 @@ class Ship(object):
 
         for x, y in self.spine.spine:
             self.map[x][y] = 1
+
+    # for debugging
+    def print_map(self):
+
+        for y in range(self.h):
+            line = ''
+            for x in range(self.w):
+                if self.map[x][y] == 0:
+                    new = '  '
+                elif self.map[x][y] == 1:
+                    new = ' #'
+                elif self.map[x][y] == -1:
+                    new = ' -'
+                line += new
+            print line
