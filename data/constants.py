@@ -14,7 +14,10 @@ SCREEN_SIZE = (SCREENWIDTH, SCREENHEIGHT)
 CAPTION = 'Pixel Ship Generator'
 FPS = 60
 
+WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (240, 20, 10)
+YELLOW = (250, 240, 0)
 
 pygame.init()
 os.environ['SDL_VIDEO_CENTERED'] = "TRUE"

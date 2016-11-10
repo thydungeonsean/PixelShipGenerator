@@ -1,19 +1,14 @@
 from data.ship.components.basic_hull import *
 from data.ship.components.component import *
 from data.ship.ship import Ship
+from random import *
 
 
-# s = Ship((50, 50))
-# s.print_map()
+s = Ship((50, 50))
 
-d = Diamond((0, 0), (20, 12))
-d.print_map()
 
-# a = AngleTopLeft((0, 0), (10, 10))
-# a.print_map()
-# b = AngleTopRight((0, 0), (10, 10))
-# b.print_map()
-# c = AngleBottomLeft((0, 0), (10, 10))
-# c.print_map()
-# d = AngleBottomRight((0, 0), (10, 10))
-# d.print_map()
+for i in range(50):
+    c = Rect((0, 0), (randint(3, 15), randint(3, 8)))
+    s.add_component(c)
+
+    s.print_map()

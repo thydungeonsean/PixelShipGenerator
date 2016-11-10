@@ -127,8 +127,7 @@ class Diamond(Component):
         br = AngleBottomRight((sub_w-1, sub_h-1), (sub_w, sub_h), autooutline=False)
 
         for component in (tl, tr, bl, br):
-            print component
-            print component.x, component.y
+
             self.add(component)
 
         self.outline(trim=True)

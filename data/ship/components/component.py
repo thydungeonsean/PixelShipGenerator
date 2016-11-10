@@ -21,6 +21,7 @@ class Component(object):
         self.map = [[0 for my in range(h)] for mx in range(w)]
         
         self.points = set()
+        self.edges = set()
 
         if autocreate:
             self.create()
@@ -34,6 +35,17 @@ class Component(object):
 
         self.map[x][y] = value
         self.points.add((x, y))
+
+    def add_edge(self, (x, y)):
+
+        self.map[x][y] = -1
+        self.edges.add((x, y))
+
+    def trim_edge(self, (x, y)):
+
+        self.map[x][y] = 0
+        self.edges.remove((x, y))
+        self.points.remove((x, y))
 
     def outline(self, trim=False):
     
@@ -51,7 +63,7 @@ class Component(object):
                     break
                     
         for px, py in outline:
-            self.map[px][py] = -1
+            self.add_edge((px, py))
 
         if trim:
             self.trim_outline(outline)
@@ -71,9 +83,8 @@ class Component(object):
                 trim.add((x, y))
 
         for tx, ty in trim:
-            self.map[tx][ty] = 0
-            self.points.remove((tx, ty))
- 
+            self.trim_edge((tx, ty))
+
     def get_adj(self, (x, y)):
 
         raw_adj = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
@@ -151,6 +162,21 @@ class Component(object):
                 line += new
             print line
 
+    def get_relative_points(self, edge=False):
+
+        if edge:
+            pointset = self.edges
+        else:
+            pointset = self.points
+
+        rel = set()
+        for x, y in pointset:
+            nx = x + self.x
+            ny = y + self.y
+            rel.add((nx, ny))
+
+        return rel
+
     # adds a component object's map to current map
     def add(self, component):
 
@@ -167,18 +193,7 @@ class Component(object):
                 if c_value != 0:
                     self.add_pixel((mx, my), value=c_value)
 
-    def attach(self, ship):
-        
-        for x, y in self.points:
-            x += self.x
-            y += self.y
-            ship.change_pixel((x, y), self.map[x][y])
-            
-    def place(self):
-        pass
-        # select a start position on ship map
-        # check if attached
-        # check if not overlapping
-        # if those pass, check if in frame
-        # needs methods to move position intelligently to meet conditions
+    def move(self, (x, y)):
 
+        self.x = x
+        self.y = y

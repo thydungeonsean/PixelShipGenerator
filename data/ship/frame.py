@@ -221,6 +221,14 @@ class Frame(object):
 
         return False
 
+    def point_in_frame(self):
+
+        while True:
+            x = randint(0, self.w-1)
+            y = randint(0, self.h-1)
+            if self.is_in_frame((x, y)):
+                return x, y
+
 
 class Zone(object):
 

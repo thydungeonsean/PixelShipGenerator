@@ -10,7 +10,7 @@ class Spine(object):
 
         self.frame = frame
 
-        self.spine = self.build_spine()
+        self.points = self.build_spine()
 
     def build_spine(self):
 
