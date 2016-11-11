@@ -10,7 +10,7 @@ class Pallet(object):
                                # (bh.AngleBottomRight, 0), (bh.Diamond, 0),
                                # (bh.AngleTopRight, 0), (bh.AngleBottomLeft, 0),
                                # (bh.AngleTopLeft, 0)]
-        self.component_list = [(bh.Rect, 3), (bh.Rect, 1), (bh.Rect, 2), (bh.Diamond, 0)]
+        self.component_list = [(bh.Rect, 3), (bh.Rect, 1), (bh.Rect, 2), (bh.Circle, 0)]
 
     def get_component(self):
 

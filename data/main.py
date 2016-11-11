@@ -36,11 +36,17 @@ class Main(object):
 
         self.state = gen.Generator()
 
+        shot = True
         while not self.end:
             self.handle_input()
             self.draw()
             self.clock.tick(FPS)
             pygame.display.update()
+            if shot:
+                # save screen
+                s = pygame.display.get_surface()
+                pygame.image.save(s, 'screenshot.png')
+                shot = False
 
 
 def main():

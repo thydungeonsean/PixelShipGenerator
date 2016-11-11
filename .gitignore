@@ -3,3 +3,6 @@
 
 # python byte files
 *.pyc
+
+# ignore screenshot not explicitly added
+.png
