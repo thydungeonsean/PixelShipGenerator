@@ -4,9 +4,44 @@ from random import *
                 
 class Rect(Component):
 
-    def __init__(self, (x, y), (w, h)):
+    @classmethod
+    def generate_normal(cls):
+        w = randint(3, 10)
+        h = randint(3, 7)
+        return cls((w, h))
+
+    @classmethod
+    def generate_long(cls):
+        w = randint(5, 20)
+        h = randint(3, 5)
+        return cls((w, h))
+
+    @classmethod
+    def generate_peg(cls):
+        w = randint(3, 4)
+        h = randint(4, 7)
+        return cls((w, h))
+
+    @classmethod
+    def generate_beam(cls):
+        w = randint(5, 20)
+        h = 3
+        return cls((w, h))
+
+    @classmethod
+    def generate(cls, style=0):
+        style_dict = {0: cls.generate_normal,
+                      1: cls.generate_long,
+                      2: cls.generate_peg,
+                      3: cls.generate_beam
+                      }
+        style_num = len(style_dict)
+        s = style % style_num
+        return style_dict[s]()
+
+    def __init__(self, (w, h)):
         
-        Component.__init__(self, (x, y), (w, h))
+        Component.__init__(self, (w, h))
         
     def create(self):
     
@@ -17,22 +52,31 @@ class Rect(Component):
                 
 class Square(Rect):
 
-    def __init__(self, (x, y), (w, h)):
-        w = min((w, h))
-        Rect.__init__(self, (x, y), (w, w))
+    @classmethod
+    def generate(cls, style=0):
+        w = randint(3, 10)
+        return cls(w)
+
+    def __init__(self, w):
+        Rect.__init__(self, (w, w))
 
 
 class _Angle(Component):
 
+    @classmethod
+    def generate(cls, style=0):
+        w = randint(5, 10)
+        return cls(w)
+
     # not a working component - base class for 45 degree
     # angle components
 
-    def __init__(self, (x, y), (w, h), m=1, b=0):
+    def __init__(self, w, coord=(0, 0), m=1, b=0):
 
         self.m = m
         self.b = b
 
-        Component.__init__(self, (x, y), (w, h), autocreate=False)
+        Component.__init__(self, (w, w), coord=coord, autocreate=False)
 
     def create(self):
 
@@ -50,9 +94,9 @@ class _Angle(Component):
 
 class AngleTopRight(_Angle):
 
-    def __init__(self, (x, y), (w, h), autooutline=True):
+    def __init__(self, w, coord=(0, 0), autooutline=True):
 
-        _Angle.__init__(self, (x, y), (w, h))
+        _Angle.__init__(self, w, coord)
         self.create()
         if autooutline:
             self.outline()
@@ -66,9 +110,9 @@ class AngleTopRight(_Angle):
 
 class AngleTopLeft(_Angle):
 
-    def __init__(self, (x, y), (w, h), autooutline=True):
+    def __init__(self, w, coord=(0, 0), autooutline=True):
 
-        _Angle.__init__(self, (x, y), (w, h), m=-1, b=h)
+        _Angle.__init__(self, w, coord, m=-1, b=w)
         self.create()
         if autooutline:
             self.outline()
@@ -82,9 +126,9 @@ class AngleTopLeft(_Angle):
 
 class AngleBottomRight(_Angle):
 
-    def __init__(self, (x, y), (w, h), autooutline=True):
+    def __init__(self, w, coord=(0, 0), autooutline=True):
 
-        _Angle.__init__(self, (x, y), (w, h), m=-1, b=h)
+        _Angle.__init__(self, w, coord, m=-1, b=w)
         self.create()
         if autooutline:
             self.outline()
@@ -98,9 +142,9 @@ class AngleBottomRight(_Angle):
 
 class AngleBottomLeft(_Angle):
 
-    def __init__(self, (x, y), (w, h), autooutline=True):
+    def __init__(self, w, coord=(0, 0), autooutline=True):
 
-        _Angle.__init__(self, (x, y), (w, h))
+        _Angle.__init__(self, w, coord)
         self.create()
         if autooutline:
             self.outline()
@@ -114,17 +158,21 @@ class AngleBottomLeft(_Angle):
 
 class Diamond(Component):
 
-    def __init__(self, (x, y), (w, h)):
+    @classmethod
+    def generate(cls, style=0):
+        w = randint(5, 11)
+        return cls(w)
 
-        Component.__init__(self, (x, y), (w, h))
+    def __init__(self, w):
+
+        Component.__init__(self, (w, w))
 
     def create(self):
-        sub_w = self.w/2
-        sub_h = self.h/2
-        tl = AngleTopLeft((0, 0), (sub_w, sub_h), autooutline=False)
-        tr = AngleTopRight((sub_w-1, 0), (sub_w, sub_h), autooutline=False)
-        bl = AngleBottomLeft((0, sub_h-1), (sub_w, sub_h), autooutline=False)
-        br = AngleBottomRight((sub_w-1, sub_h-1), (sub_w, sub_h), autooutline=False)
+        w = self.w/2
+        tl = AngleTopLeft(w, coord=(0, 0), autooutline=False)
+        tr = AngleTopRight(w, coord=(w-1, 0), autooutline=False)
+        bl = AngleBottomLeft(w, coord=(0, w-1),  autooutline=False)
+        br = AngleBottomRight(w, coord=(w-1, w-1), autooutline=False)
 
         for component in (tl, tr, bl, br):
 

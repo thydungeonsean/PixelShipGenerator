@@ -121,7 +121,7 @@ class Frame(object):
         self.zones = self.load_zone_layout(layout)
 
         # count of unique points that are within the frame
-        self.zone_capacity = self.get_capacity()
+        self.size = self.get_capacity()
 
         self.spine = Spine(self)
 

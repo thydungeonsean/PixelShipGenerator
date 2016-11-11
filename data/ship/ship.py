@@ -1,6 +1,7 @@
 from random import *
 from ..constants import *
 from frame import Frame
+from pallet import Pallet
 
 
 class Ship(object):
@@ -33,14 +34,19 @@ class Ship(object):
         self.color = self.set_random_color()
         self.frame = self.set_frame()
         self.spine = self.frame.spine
+        self.pallet = Pallet()
 
         # conformity is percentage of tiles per component that should be in frame
-        self.conformity = .75
+        self.conformity = .65
         # size is % of frame that must be filled to complete component stage
         self.size = .75
+        self.frame_size = self.frame.size
+        self.points_in_frame = 0
 
         self.pixels = set()
         self.edges = set()
+
+        self.generate_ship()
 
         self.image, self.rect = self.set_image()
         print self.frame.layout
@@ -143,11 +149,8 @@ class Ship(object):
             elif component.map[x][y] == -1:
                 self.edges.add((rx, ry))
 
-    # select a start position on ship map
-    # check if connected
-    # check if not overlapping
-    # if those pass, check if in frame
-    # needs methods to move position intelligently to meet conditions
+            if self.frame.is_in_frame((rx, ry)):
+                self.points_in_frame += 1
 
     def is_connected_to_ship(self, c):
 
@@ -193,6 +196,12 @@ class Ship(object):
 
     def add_component(self, component):
 
+        # select a start position on ship map
+        # check if connected
+        # check if not overlapping
+        # if those pass, check if in frame
+        # needs methods to move position intelligently to meet conditions
+
         c = component
 
         placer = ComponentPlacer(self, c)
@@ -203,7 +212,7 @@ class Ship(object):
         while not attached:
 
             count += 1
-            if count > 10:
+            if count > 20:
                 return
 
             # place component
@@ -230,6 +239,24 @@ class Ship(object):
             attached = connected
 
         self.attach(c)
+
+    def generate_ship(self):
+
+        count = 0
+        while self.frame_not_full():
+            count += 1
+            c = self.pallet.get_component()
+            self.add_component(c)
+            if count > 200:
+                break
+
+    def frame_not_full(self):
+        ratio = self.points_in_frame / float(self.frame_size)
+
+        if ratio < self.size:
+            return True
+        else:
+            return False
 
 
 class ComponentPlacer(object):

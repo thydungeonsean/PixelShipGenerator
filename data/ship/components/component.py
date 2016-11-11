@@ -8,13 +8,12 @@ class Component(object):
     sets the initial value of the map
     """
 
-    def __init__(self, (x, y), (w, h), autocreate=True, autooutline=True):
+    def __init__(self, (w, h), coord=(0, 0), autocreate=True, autooutline=True):
 
         self.w = w
         self.h = h
         
-        self.x = x
-        self.y = y
+        self.x, self.y = coord
         
         # maybe this is the problem - had x and y as var names for list builder
         # and they were before assigning proper attributes - renamed mx, my
