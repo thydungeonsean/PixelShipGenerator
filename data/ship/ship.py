@@ -1,7 +1,8 @@
 from random import *
+import time
 from ..constants import *
 from frame import Frame
-from pallet import Pallet
+from palette import Palette
 
 
 class Ship(object):
@@ -26,7 +27,7 @@ class Ship(object):
 
         return r, g, b
 
-    def __init__(self, (w, h)):
+    def __init__(self, (w, h), animating=False):
 
         self.map = [[0 for y in range(h)] for x in range(w)]
         self.w = w
@@ -34,7 +35,7 @@ class Ship(object):
         self.color = self.set_random_color()
         self.frame = self.set_frame()
         self.spine = self.frame.spine
-        self.pallet = Pallet()
+        self.pallet = Palette()
 
         # conformity is percentage of tiles per component that should be in frame
         self.conformity = .65
@@ -46,7 +47,7 @@ class Ship(object):
         self.pixels = set()
         self.edges = set()
 
-        self.generate_ship()
+        self.generate_ship(animating)
 
         self.image, self.rect = self.set_image()
         print self.frame.layout
@@ -194,7 +195,7 @@ class Ship(object):
             return True
         return False
 
-    def add_component(self, component):
+    def add_component(self, component, animating):
 
         # select a start position on ship map
         # check if connected
@@ -206,10 +207,16 @@ class Ship(object):
 
         placer = ComponentPlacer(self, c)
 
+        if animating:
+            ci, cr = c.set_image(self.color)
+
         # check if good position - adjust - iterate
         count = 0
         attached = False
         while not attached:
+
+            if animating:
+                self.animate(c, ci, cr)
 
             count += 1
             if count > 20:
@@ -240,13 +247,14 @@ class Ship(object):
 
         self.attach(c)
 
-    def generate_ship(self):
+    def generate_ship(self, animating=False):
 
         count = 0
         while self.frame_not_full():
+
             count += 1
             c = self.pallet.get_component()
-            self.add_component(c)
+            self.add_component(c, animating)
             if count > 200:
                 break
 
@@ -257,6 +265,20 @@ class Ship(object):
             return True
         else:
             return False
+
+    def animate(self, c, ci, cr):
+
+        self.image, self.rect = self.set_image()
+        screen = pygame.display.get_surface()
+        screen.blit(self.image, self.rect)
+
+        x = scale(c.x)
+        y = scale(c.y)
+        cr.topleft = x, y
+
+        screen.blit(ci, cr)
+        # time.sleep(0.05)
+        pygame.display.update()
 
 
 class ComponentPlacer(object):

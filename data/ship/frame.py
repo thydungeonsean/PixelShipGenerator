@@ -66,7 +66,7 @@ class Frame(object):
     default = (('Med', 'Med'), )
     # prefabricated zone layouts
     layout = {'rect': (('Long', 'Short'), ),
-              'square': (('Long', 'Tall'), ),
+              'square': (('Med', 'Med'), ),
               'donut': (('Long', 'Squat', 'Top'),
                         ('Long', 'Squat', 'Bot'),
                         ('Skinny', 'Tall', 'Right'),

@@ -27,9 +27,12 @@ class Main(object):
                 if event.key == K_ESCAPE:
                     self.end = True
 
-    def draw(self):
+                elif event.key == K_SPACE:
+                    self.state.fill_grid()
 
-        self.state.draw(self.screen)
+    def draw(self, frame=False, spine=False):
+
+        self.state.draw(self.screen, frame, spine)
 
     # main loop for the generator
     def main(self):
@@ -39,7 +42,7 @@ class Main(object):
         shot = True
         while not self.end:
             self.handle_input()
-            self.draw()
+            self.draw(True, True)
             self.clock.tick(FPS)
             pygame.display.update()
             if shot:

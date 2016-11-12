@@ -19,7 +19,7 @@ class Rect(Component):
     @classmethod
     def generate_peg(cls):
         w = randint(3, 4)
-        h = randint(4, 7)
+        h = randint(4, 9)
         return cls((w, h))
 
     @classmethod
@@ -53,9 +53,23 @@ class Rect(Component):
 class Square(Rect):
 
     @classmethod
-    def generate(cls, style=0):
-        w = randint(3, 10)
+    def generate_brick(cls):
+        w = randint(3, 5)
         return cls(w)
+
+    @classmethod
+    def generate_square(cls):
+        w = randint(5, 8)
+        return cls(w)
+
+    @classmethod
+    def generate(cls, style=0):
+        style_dict = {0: cls.generate_square,
+                      1: cls.generate_brick
+                      }
+        style_num = len(style_dict)
+        s = style % style_num
+        return style_dict[s]()
 
     def __init__(self, w):
         Rect.__init__(self, (w, w))
@@ -65,7 +79,7 @@ class _Angle(Component):
 
     @classmethod
     def generate(cls, style=0):
-        w = randint(5, 10)
+        w = randint(5, 7)
         return cls(w)
 
     # not a working component - base class for 45 degree
@@ -154,58 +168,3 @@ class AngleBottomLeft(_Angle):
             return True
         else:
             return False
-
-
-class Diamond(Component):
-
-    @classmethod
-    def generate(cls, style=0):
-        w = randint(2, 7)
-        return cls(w)
-
-    def __init__(self, w):
-        end_w = w * 2-1
-        Component.__init__(self, (end_w, end_w))
-
-    def create(self):
-
-        w = self.w/2 + 1
-        tl = AngleTopLeft(w, coord=(0, 0), autooutline=False)
-        tr = AngleTopRight(w, coord=(w-1, 0), autooutline=False)
-        bl = AngleBottomLeft(w, coord=(0, w-1),  autooutline=False)
-        br = AngleBottomRight(w, coord=(w-1, w-1), autooutline=False)
-
-        for component in (tl, tr, bl, br):
-
-            self.add(component)
-
-        self.outline(trim=True)
-
-
-class Circle(Component):
-
-    @classmethod
-    def generate(cls, style=0):
-        w = randint(5, 11)
-        return cls(w)
-
-    def __init__(self, w):
-
-        Component.__init__(self, (w, w))
-
-    def create(self):
-
-        w = self.w/2
-        tl = AngleTopLeft(w, coord=(0, 0), autooutline=False)
-        tr = AngleTopRight(w, coord=(w-1, 0), autooutline=False)
-        bl = AngleBottomLeft(w, coord=(0, w-1),  autooutline=False)
-        br = AngleBottomRight(w, coord=(w-1, w-1), autooutline=False)
-
-        for component in (tl, tr, bl, br):
-
-            self.add(component)
-
-        self.outline(trim=True)
-
-
-

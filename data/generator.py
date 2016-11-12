@@ -24,8 +24,8 @@ class Generator(object):
         return grid
 
     @staticmethod
-    def generate_ship(w=50, h=50):
-        s = Ship((w, h))
+    def generate_ship(w=descale(SHIPW), h=descale(SHIPH), animating=False):
+        s = Ship((w, h), animating)
         return s
 
     def __init__(self):
@@ -39,15 +39,17 @@ class Generator(object):
 
         for i in Generator.grid_points:
             point = self.grid_ref[i]
-            ship = self.generate_ship()
+            ship = self.generate_ship(animating=False)
 
             self.ship_grid[point] = ship
+            self.draw(pygame.display.get_surface())
+            pygame.display.update()
 
-    def draw(self, surface):
+    def draw(self, surface, show_frame=False, show_spine=False):
 
         for (x, y), ship in self.ship_grid.items():
             point = x*SHIPW, y*SHIPH
-            i, r = ship.get_image()
+            i, r = ship.get_image(show_frame, show_spine)
             r.topleft = point
             surface.blit(i, r)
 

@@ -28,3 +28,6 @@ SCREEN_RECT = SCREEN.get_rect()
 
 def scale(n):
     return n * SCALE
+
+def descale(n):
+    return n / SCALE

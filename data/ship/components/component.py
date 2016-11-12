@@ -1,3 +1,5 @@
+import pygame
+from ...constants import *
 
 
 class Component(object):
@@ -14,9 +16,7 @@ class Component(object):
         self.h = h
         
         self.x, self.y = coord
-        
-        # maybe this is the problem - had x and y as var names for list builder
-        # and they were before assigning proper attributes - renamed mx, my
+
         self.map = [[0 for my in range(h)] for mx in range(w)]
         
         self.points = set()
@@ -26,6 +26,26 @@ class Component(object):
             self.create()
             if autooutline:
                 self.outline()
+
+    def set_image(self, c):
+
+        image = pygame.Surface((self.w, self.h))
+        image.fill(WHITE)
+
+        pix_array = pygame.PixelArray(image)
+        for y in range(self.h):
+            for x in range(self.w):
+                if self.map[x][y] == 1:
+                    pix_array[x, y] = c
+                elif self.map[x][y] == -1:
+                    pix_array[x, y] = BLACK
+
+        scaled = pygame.transform.scale(image, (scale(self.w), scale(self.h)))
+        image = scaled.convert()
+        image.set_colorkey(WHITE)
+        rect = image.get_rect()
+
+        return image, rect
 
     def create(self):
         pass
@@ -196,3 +216,20 @@ class Component(object):
 
         self.x = x
         self.y = y
+
+    # transforming methods
+    def transform(self, direction):
+
+        new_w = self.h
+        new_h = self.w
+        new_map = [[0 for y in range(new_h)] for x in range(new_w)]
+        new_points = set()
+        new_edges = set()
+
+        # transpose coordinates
+
+        self.map = new_map
+        self.w = new_w
+        self.h = new_h
+        self.points = new_points
+        self.edges = new_edges
