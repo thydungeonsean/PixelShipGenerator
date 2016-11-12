@@ -5,9 +5,9 @@
 *.pyc
 
 # ignore screenshot not explicitly added
-.png
+*.png
 
 # ignore pyinstaller artifacts
-.spec
-.dist/
-.build/
+*.spec
+dist/
+build/
