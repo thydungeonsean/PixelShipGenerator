@@ -6,3 +6,8 @@
 
 # ignore screenshot not explicitly added
 .png
+
+# ignore pyinstaller artifacts
+.spec
+.dist/
+.build/
