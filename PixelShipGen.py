@@ -2,6 +2,7 @@
 
 import sys
 import pygame
+import pygame._view
 from data.main import main
         
         

@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from constants import FPS
 import generator as gen
+import title_screen as tit
 from ship.components.basic_hull import *
 
 
@@ -19,32 +20,33 @@ class Main(object):
 
     def handle_input(self):
 
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                self.end = True
+        self.state.handle_input()
 
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.end = True
+    def draw(self):
 
-                elif event.key == K_SPACE:
-                    self.state.fill_grid()
+        self.state.draw(self.screen)
 
-    def draw(self, frame=False, spine=False):
+    def end_main(self):
+        self.end = True
 
-        self.state.draw(self.screen, frame, spine)
+    def start_generator(self):
+
+        self.state = gen.Generator(self)
 
     # main loop for the generator
     def main(self):
 
-        self.state = gen.Generator()
+        self.state = tit.TitleScreen(self)
 
         shot = True
         while not self.end:
-            self.handle_input()
+
             self.draw()
-            self.clock.tick(FPS)
             pygame.display.update()
+
+            self.clock.tick(FPS)
+            self.handle_input()
+
             if shot:
                 # save screen
                 s = pygame.display.get_surface()

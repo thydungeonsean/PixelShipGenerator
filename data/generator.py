@@ -28,10 +28,15 @@ class Generator(object):
         s = Ship((w, h), animating)
         return s
 
-    def __init__(self):
+    def __init__(self, main):
+
+        self.main = main
 
         self.grid_ref = self.set_grid()
         self.ship_grid = {}
+
+        self.show_frame = False
+        self.show_spine = False
 
         self.fill_grid()
 
@@ -45,11 +50,23 @@ class Generator(object):
             self.draw(pygame.display.get_surface())
             pygame.display.update()
 
-    def draw(self, surface, show_frame=False, show_spine=False):
+    def draw(self, surface):
 
         for (x, y), ship in self.ship_grid.items():
             point = x*SHIPW, y*SHIPH
-            i, r = ship.get_image(show_frame, show_spine)
+            i, r = ship.get_image(self.show_frame, self.show_spine)
             r.topleft = point
             surface.blit(i, r)
 
+    def handle_input(self):
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.main.end_main()
+
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    self.main.end_main()
+
+                elif event.key == K_SPACE:
+                    self.fill_grid()
