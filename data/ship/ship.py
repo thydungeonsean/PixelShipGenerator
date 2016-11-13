@@ -26,6 +26,7 @@ class Ship(object):
         b = randint(0, 255)
 
         return r, g, b
+        #return RED
 
     def __init__(self, (w, h), animating=False):
 
@@ -35,10 +36,10 @@ class Ship(object):
         self.color = self.set_random_color()
         self.frame = self.set_frame()
         self.spine = self.frame.spine
-        self.pallet = Palette()
+        self.palette = Palette()
 
         # conformity is percentage of tiles per component that should be in frame
-        self.conformity = .65
+        self.conformity = .55
         # size is % of frame that must be filled to complete component stage
         self.size = .75
         self.frame_size = self.frame.size
@@ -70,6 +71,10 @@ class Ship(object):
         if self.pixel_on_map((x, y)):
             if value != 0:
                 self.map[x][y] = value
+                if value == 1:
+                    self.pixels.add((x, y))
+                elif value == -1:
+                    self.edges.add((x, y))
 
     def set_image(self):
 
@@ -145,10 +150,6 @@ class Ship(object):
             rx = x + component.x
             ry = y + component.y
             self.change_pixel((rx, ry), component.map[x][y])
-            if component.map[x][y] == 1:
-                self.pixels.add((rx, ry))
-            elif component.map[x][y] == -1:
-                self.edges.add((rx, ry))
 
             if self.frame.is_in_frame((rx, ry)):
                 self.points_in_frame += 1
@@ -205,6 +206,19 @@ class Ship(object):
 
         c = component
 
+        self.move_and_check_placement(c, animating)
+
+    def grow_out_placement(self, c, animating):
+
+        # find a point along existing edge of ship
+        # generate a component containing that point
+
+        # check - move until placed or x cycles
+
+        pass
+
+    def move_and_check_placement(self, c, animating):
+
         placer = ComponentPlacer(self, c)
 
         if animating:
@@ -253,10 +267,12 @@ class Ship(object):
         while self.frame_not_full():
 
             count += 1
-            c = self.pallet.get_component()
+            c = self.palette.get_component()
             self.add_component(c, animating)
-            if count > 200:
+            if count > 100:
                 break
+
+        self.fill_gaps()
 
     def frame_not_full(self):
         ratio = self.points_in_frame / float(self.frame_size)
@@ -280,6 +296,30 @@ class Ship(object):
         # time.sleep(0.05)
         pygame.display.update()
 
+    def fill_gaps(self):
+
+        gaps = set()
+
+        for y in range(self.h):
+            for x in range(self.w):
+                if (x, y) not in self.pixels and (x, y) not in self.edges:
+                    if self.point_is_gap((x, y)):
+                        gaps.add((x, y))
+
+        for point in gaps:
+            self.change_pixel(point, 1)
+
+    def point_is_gap(self, (x, y)):
+
+        adj = ((x+1, y), (x-1, y), (x, y+1), (x, y-1),
+               (x+1, y+1), (x-1, y+1), (x+1, y-1), (x-1, y-1))
+        edges = 0
+        for ax, ay in adj:
+            if self.pixel_on_map((ax, ay)) and self.map[ax][ay] == -1:
+                edges += 1
+
+        return edges >= randint(5, 6)
+
 
 class ComponentPlacer(object):
 
@@ -295,6 +335,8 @@ class ComponentPlacer(object):
 
         self.vector = None
         self.vector_log = []
+
+        self.reversed_once = False
 
     def record(self, pos, state):
 
@@ -325,11 +367,14 @@ class ComponentPlacer(object):
             return None
         return self.move_dict[self.previous_position]
 
-    def place(self):
+    def place(self, start=randint(0, 1)):
 
         # if this is first placement of component, we do it randomly within the frame
         if not self.move_log:
-            return self.get_start_point_in_frame()
+            if start == 0:
+                return self.get_start_point_in_frame()
+            elif start == 1:
+                return self.get_start_point_on_edge()
 
         current_state = self.current_state
         previous_state = self.previous_state
@@ -340,8 +385,13 @@ class ComponentPlacer(object):
             if previous_state == 'unconnected' or previous_state is None:
                 self.move_towards_center()
                 return self.move_on_vector()
-            else:  # we went from connected to unconnected - no good, find new solution
+            elif not self.reversed_once:  # we went from connected to unconnected - no good, find new solution
                 self.reverse_vector()
+                self.reversed_once = True
+                return self.move_on_vector()
+            else:
+                self.reversed_once = False
+                self.set_random_vector()
                 return self.move_on_vector()
 
         # if we are connected but overlapping, try and move so that we reduce amount overlapping
@@ -415,6 +465,21 @@ class ComponentPlacer(object):
         c = self.component
 
         ix, iy = self.ship.frame.point_in_frame()
+        xvar = c.w / 2
+        yvar = c.h / 2
+        ix += randint(-xvar, xvar)
+        iy += randint(-yvar, yvar)
+
+        return ix, iy
+
+    def get_start_point_on_edge(self):
+
+        if not self.ship.edges:
+            return self.get_start_point_in_frame()
+
+        c = self.component
+
+        ix, iy = choice(tuple(self.ship.edges))
         xvar = c.w / 2
         yvar = c.h / 2
         ix += randint(-xvar, xvar)

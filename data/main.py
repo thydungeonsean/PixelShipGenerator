@@ -42,7 +42,7 @@ class Main(object):
         shot = True
         while not self.end:
             self.handle_input()
-            self.draw(True, True)
+            self.draw()
             self.clock.tick(FPS)
             pygame.display.update()
             if shot:

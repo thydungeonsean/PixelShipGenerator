@@ -11,3 +11,4 @@
 *.spec
 dist/
 build/
+setup.py

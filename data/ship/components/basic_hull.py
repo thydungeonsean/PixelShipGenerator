@@ -12,7 +12,7 @@ class Rect(Component):
 
     @classmethod
     def generate_long(cls):
-        w = randint(5, 20)
+        w = randint(5, 15)
         h = randint(3, 5)
         return cls((w, h))
 
@@ -24,8 +24,14 @@ class Rect(Component):
 
     @classmethod
     def generate_beam(cls):
-        w = randint(5, 20)
+        w = randint(5, 15)
         h = 3
+        return cls((w, h))
+
+    @classmethod
+    def generate_tall(cls):
+        w = randint(3, 6)
+        h = randint(6, 12)
         return cls((w, h))
 
     @classmethod
@@ -33,7 +39,8 @@ class Rect(Component):
         style_dict = {0: cls.generate_normal,
                       1: cls.generate_long,
                       2: cls.generate_peg,
-                      3: cls.generate_beam
+                      3: cls.generate_beam,
+                      4: cls.generate_tall
                       }
         style_num = len(style_dict)
         s = style % style_num
@@ -79,7 +86,7 @@ class _Angle(Component):
 
     @classmethod
     def generate(cls, style=0):
-        w = randint(5, 7)
+        w = randint(4, 6)
         return cls(w)
 
     # not a working component - base class for 45 degree

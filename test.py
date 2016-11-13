@@ -14,7 +14,10 @@ from random import *
 #
 #     s.print_map()
 
-p = Pallet()
-c = p.get_component()
-c.print_map()
+i = set((1, 2, 3))
+j = set((4, 5, 6))
+
+print list(i) + list(j)
+print i
+print j
 

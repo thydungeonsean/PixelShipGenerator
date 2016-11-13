@@ -66,9 +66,10 @@ class Frame(object):
     default = (('Med', 'Med'), )
     # prefabricated zone layouts
     layout = {'rect': (('Long', 'Short'), ),
+              'small_rect': (('Med', 'Short'), ),
               'square': (('Med', 'Med'), ),
-              'donut': (('Long', 'Squat', 'Top'),
-                        ('Long', 'Squat', 'Bot'),
+              'donut': (('Med', 'Squat', 'High'),
+                        ('Med', 'Squat', 'Low'),
                         ('Skinny', 'Tall', 'Right'),
                         ('Skinny', 'Tall', 'Left')),
               'cross': (('Long', 'Squat'),
@@ -89,6 +90,16 @@ class Frame(object):
                               ('Skinny', 'Med', 'Left', 'Low')),
               'right_corner': (('Long', 'Short'),
                                ('Skinny', 'Med', 'Right', 'Low')),
+              'arch': (('Long', 'Short'),
+                       ('Skinny', 'Med', 'Left', 'Low'),
+                       ('Skinny', 'Med', 'Right', 'Low')),
+              'left_fin': (('Long', 'Short'),
+                           ('Skinny', 'Med', 'Left', 'High')),
+              'right_fin': (('Long', 'Short'),
+                            ('Skinny', 'Med', 'Right', 'High')),
+              'tower': (('Skinny', 'Tall'), ),
+              'moon': (('Skinny', 'Tall'),
+                       ('Med', 'Med'))
               }
 
     max_zones = 5

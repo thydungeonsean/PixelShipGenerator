@@ -5,7 +5,7 @@ from random import *
 
 class Palette(object):
 
-    basic = ((bh.Rect, 0), (bh.Rect, 1), (bh.Rect, 3), (bh.Square, 0))
+    basic = ((bh.Rect, 0), (bh.Rect, 1), (bh.Rect, 3), (bh.Square, 0), (bh.Rect, 4))
     connector = ((bh.Rect, 2), (bh.Square, 1))
     angles = ((bh.AngleTopLeft, 0), (bh.AngleTopRight, 0), (bh.AngleBottomLeft, 0),
               (bh.AngleBottomRight, 0), (ch.Diamond, 0))
