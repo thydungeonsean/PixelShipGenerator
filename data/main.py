@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from constants import FPS
+from constants import *
 import generator as gen
 import title_screen as tit
 from ship.components.basic_hull import *
@@ -17,6 +17,7 @@ class Main(object):
         self.clock = pygame.time.Clock()
         self.end = False
         self.state = None
+        self.gen = None
 
     def handle_input(self):
 
@@ -29,9 +30,20 @@ class Main(object):
     def end_main(self):
         self.end = True
 
-    def start_generator(self):
+    def show_instructions(self):
 
+        self.gen = self.state
+        self.state = tit.Instructions(self)
+
+    def start_generator(self):
+        screen = pygame.display.get_surface()
+        screen.fill(BLACK)
         self.state = gen.Generator(self)
+
+    def continue_generator(self):
+        screen = pygame.display.get_surface()
+        screen.fill(BLACK)
+        self.state = self.gen
 
     # main loop for the generator
     def main(self):
