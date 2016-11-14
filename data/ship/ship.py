@@ -3,6 +3,29 @@ import time
 from ..constants import *
 from frame import Frame
 from palette import Palette
+import os
+import sys
+
+
+def set_ship_count():
+    pathname = os.path.dirname(sys.argv[0]) + '/screenshots/'
+
+    existing_pics = []
+
+    for file in os.listdir(pathname):
+        fname = pathname + file
+        if os.path.isfile(fname) and file.endswith('.png') and file.startswith('ship'):
+            num = file.rstrip('.png')
+            num = num.lstrip('ship')
+            try:
+                num = int(num)
+                existing_pics.append(num)
+            except ValueError:
+                pass
+    if len(existing_pics) > 0:
+        return max(existing_pics)
+    else:
+        return 0
 
 
 class Ship(object):
@@ -18,6 +41,9 @@ class Ship(object):
 
     """
 
+    # TODO - find a non messy way to move this function into class
+    count = set_ship_count()
+
     @staticmethod
     def set_random_color():
 
@@ -29,6 +55,9 @@ class Ship(object):
         #return RED
 
     def __init__(self, (w, h), animating=False):
+
+        self.ship_id = str(Ship.count)
+        Ship.count += 1
 
         self.map = [[0 for y in range(h)] for x in range(w)]
         self.w = w
