@@ -7,6 +7,15 @@ class State(object):
 
         self.main = main
 
+    def handle_input(self):
+        pass
+
+    def draw(self, surface):
+        pass
+
+    def update(self):
+        pass
+
         # having troubles getting font to work with py2exe
         #self.font = pygame.font.Font('assets/oryxtype.ttf', 64)
 

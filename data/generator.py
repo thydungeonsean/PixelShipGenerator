@@ -9,8 +9,8 @@ class Generator(State):
 
     gridw = 8
     gridh = 6
-    grid_list = range(gridw * gridh)
-
+    gridsize = gridw * gridh
+    grid_list = range(gridsize)
 
     @classmethod
     def set_grid_ref(cls):
@@ -34,9 +34,12 @@ class Generator(State):
 
         State.__init__(self, main)
 
+        self.generating = True
+        self.slot_cursor = 0
+
         self.grid_ref = self.set_grid_ref()
         self.point_ref = self.set_point_ref()
-        self.ship_grid = {}#self.init_ship_grid()
+        self.ship_grid = self.init_ship_grid()
 
         self.selection_grid = self.set_selection_grid()
         self.selector, self.selrect = self.set_selector()
@@ -45,8 +48,6 @@ class Generator(State):
 
         self.show_frame = False
         self.show_spine = False
-
-        self.fill_grid()
 
     def set_selector(self):
 
@@ -90,23 +91,11 @@ class Generator(State):
 
         return ship_grid
 
-    def fill_grid(self):
-
-        for i in Generator.grid_list:
-
-            point = self.grid_ref[i]
-            if self.selection_grid[point]:
-                continue
-
-            ship = self.generate_ship(animating=False)
-
-            self.ship_grid[point] = ship
-            self.draw(pygame.display.get_surface())
-            pygame.display.update()
-
     def draw(self, surface):
 
         for (x, y), ship in self.ship_grid.items():
+            if ship is None:
+                continue
             point = self.point_ref[(x, y)]
             i, r = ship.get_image(self.show_frame, self.show_spine)
             r.topleft = point
@@ -136,13 +125,17 @@ class Generator(State):
                     self.main.end_main()
 
                 elif event.key == K_SPACE:
-                    self.fill_grid()
+                    #self.fill_grid()
+                    self.toggle_generate_mode()
 
                 elif event.key == K_i:
                     self.main.show_instructions()
 
-                elif event.key == K_s:
+                elif event.key == K_q:
                     self.screenshot()
+
+                elif event.key == K_s:
+                    self.save()
 
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -199,7 +192,7 @@ class Generator(State):
 
         bw = 78
 
-        buttons = [Button('generate', (0, 0), self.fill_grid),
+        buttons = [Button('generate', (0, 0), self.toggle_generate_mode),
                    Button('save', (bw, 0), self.save),
                    Button('select', (2*bw, 0), self.select),
                    Button('deselect', (3*bw, 0), self.deselect),
@@ -212,3 +205,43 @@ class Generator(State):
         s = pygame.display.get_surface()
         pygame.image.save(s, 'screenshot.png')
         shot = False
+
+    def update(self):
+
+        if not self.generating:
+            return
+
+        slot = self.get_slot_to_generate()
+        if slot is None:
+            self.generating = False
+            return
+
+        self.fill_slot(slot)
+
+    def get_slot_to_generate(self):
+
+        for grid_id in range(self.slot_cursor, Generator.gridsize):
+            point = self.grid_ref[grid_id]
+            if not self.selection_grid[point]:
+                self.increment_slot_cursor(grid_id)
+                return point
+
+    def increment_slot_cursor(self, grid_id):
+
+        self.slot_cursor = grid_id + 1
+        if self.slot_cursor >= Generator.gridsize:
+            self.slot_cursor = 0
+            self.generating = False
+
+    def fill_slot(self, point):
+
+        ship = self.generate_ship()
+
+        self.ship_grid[point] = ship
+
+    def toggle_generate_mode(self):
+
+        if self.generating:
+            self.generating = False
+        else:
+            self.generating = True

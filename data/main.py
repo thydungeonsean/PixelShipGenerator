@@ -27,6 +27,10 @@ class Main(object):
 
         self.state.draw(self.screen)
 
+    def update(self):
+
+        self.state.update()
+
     def end_main(self):
         self.end = True
 
@@ -52,6 +56,8 @@ class Main(object):
 
         shot = True
         while not self.end:
+
+            self.update()
 
             self.draw()
             pygame.display.update()
