@@ -8,6 +8,7 @@ import sys
 
 
 def set_ship_count():
+
     pathname = os.path.dirname(sys.argv[0]) + '/screenshots/'
 
     existing_pics = []
@@ -80,7 +81,7 @@ class Ship(object):
         self.generate_ship(animating)
 
         self.image, self.rect = self.set_image()
-        print self.frame.layout
+        # print self.frame.layout
 
     def set_frame(self):
 

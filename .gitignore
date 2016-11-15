@@ -13,5 +13,8 @@ dist/
 build/
 setup.py
 
+# ignore distribution packages
+packages/
+
 # ignore font
 *.ttf

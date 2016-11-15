@@ -50,7 +50,7 @@ class Main(object):
 
         self.state = tit.TitleScreen(self)
 
-        shot = False
+        shot = True
         while not self.end:
 
             self.draw()

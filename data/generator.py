@@ -141,6 +141,9 @@ class Generator(State):
                 elif event.key == K_i:
                     self.main.show_instructions()
 
+                elif event.key == K_s:
+                    self.screenshot()
+
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_buttons(mouse_pos)
@@ -204,3 +207,8 @@ class Generator(State):
 
         return buttons
 
+    def screenshot(self):
+
+        s = pygame.display.get_surface()
+        pygame.image.save(s, 'screenshot.png')
+        shot = False
