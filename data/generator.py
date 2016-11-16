@@ -8,7 +8,7 @@ import os
 class Generator(State):
 
     gridw = 8
-    gridh = 6
+    gridh = 1
     gridsize = gridw * gridh
     grid_list = range(gridsize)
 
@@ -225,10 +225,13 @@ class Generator(State):
             if not self.selection_grid[point]:
                 self.increment_slot_cursor(grid_id)
                 return point
+            else:
+                self.increment_slot_cursor(grid_id)
 
     def increment_slot_cursor(self, grid_id):
 
         self.slot_cursor = grid_id + 1
+        print self.slot_cursor
         if self.slot_cursor >= Generator.gridsize:
             self.slot_cursor = 0
             self.generating = False
