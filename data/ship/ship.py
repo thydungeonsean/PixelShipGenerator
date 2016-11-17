@@ -9,7 +9,9 @@ import sys
 
 def set_ship_count():
 
-    pathname = os.path.dirname(sys.argv[0]) + '/screenshots/'
+    pathname = os.pardir + '/exports/'
+    #pathname = '../exports/'
+    print pathname
 
     existing_pics = []
 
@@ -24,8 +26,10 @@ def set_ship_count():
             except ValueError:
                 pass
     if len(existing_pics) > 0:
-        return max(existing_pics)
+        print max(existing_pics)+1
+        return max(existing_pics)+1
     else:
+        print 0
         return 0
 
 

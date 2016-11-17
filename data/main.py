@@ -54,7 +54,6 @@ class Main(object):
 
         self.state = tit.TitleScreen(self)
 
-        shot = True
         while not self.end:
 
             self.update()
@@ -64,12 +63,6 @@ class Main(object):
 
             self.clock.tick(FPS)
             self.handle_input()
-
-            if shot:
-                # save screen
-                s = pygame.display.get_surface()
-                pygame.image.save(s, 'screenshot.png')
-                shot = False
 
 
 def main():

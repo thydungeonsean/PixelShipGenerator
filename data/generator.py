@@ -8,7 +8,7 @@ import os
 class Generator(State):
 
     gridw = 8
-    gridh = 1
+    gridh = 6
     gridsize = gridw * gridh
     grid_list = range(gridsize)
 
@@ -125,7 +125,6 @@ class Generator(State):
                     self.main.end_main()
 
                 elif event.key == K_SPACE:
-                    #self.fill_grid()
                     self.toggle_generate_mode()
 
                 elif event.key == K_i:
@@ -136,6 +135,9 @@ class Generator(State):
 
                 elif event.key == K_s:
                     self.save()
+
+                elif event.key == K_f:
+                    self.toggle_frame()
 
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -168,9 +170,17 @@ class Generator(State):
         else:
             self.selection_grid[point] = True
 
+    def toggle_frame(self):
+
+        if self.show_frame:
+            self.show_frame = False
+        else:
+            self.show_frame = True
+
     def select(self):
         for point in self.point_ref.keys():
-            self.selection_grid[point] = True
+            if self.ship_grid[point]:
+                self.selection_grid[point] = True
 
     def deselect(self):
         for point in self.point_ref.keys():
@@ -181,7 +191,7 @@ class Generator(State):
         for point in self.selection_grid.keys():
             if self.selection_grid[point]:
                 ship = self.ship_grid[point]
-                filename = 'screenshots/ship%s.png' % ship.ship_id
+                filename = '../exports/ship%s.png' % ship.ship_id
 
                 if not os.path.isfile(filename):
 
@@ -202,9 +212,14 @@ class Generator(State):
 
     def screenshot(self):
 
-        s = pygame.display.get_surface()
-        pygame.image.save(s, 'screenshot.png')
-        shot = False
+        screen = pygame.display.get_surface()
+        sr = screen.get_rect()
+        sr.topleft = (0, -BUTTONMARGIN)
+        pic = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
+        pic.blit(screen, sr)
+
+        print 'taking screen'
+        pygame.image.save(pic, '../exports/screenshot.png')
 
     def update(self):
 
@@ -231,7 +246,6 @@ class Generator(State):
     def increment_slot_cursor(self, grid_id):
 
         self.slot_cursor = grid_id + 1
-        print self.slot_cursor
         if self.slot_cursor >= Generator.gridsize:
             self.slot_cursor = 0
             self.generating = False
