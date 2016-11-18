@@ -70,18 +70,25 @@ class PixelMap(object):
 
     # transforming methods
     def transform(self, method='clockwise'):
+        
         new_w = self.h
         new_h = self.w
         new_map = [[0 for y in range(new_h)] for x in range(new_w)]
         new_points = set()
         new_edges = set()
 
-        # transpose coordinates
+        # set arguments for rotate function
         function_map = {
             'clockwise': self.clockwise_offset,
             'counter_clockwise': self.counter_clockwise_offset
             }
-        self.rotate(function_map[method], new_map, new_edges, new_points)
+        rev_map = {
+            'clockwise': False,
+            'counter_clockwise': True
+            }
+        
+        # transpose coordinates
+        self.rotate(function_map[method], new_map, new_edges, new_points, rev=rev_map[method])
 
         # replace map attributes
         self.map = new_map
@@ -90,12 +97,12 @@ class PixelMap(object):
         self.points = new_points
         self.edges = new_edges
 
-    def rotate(self, rotate_func, new_map, new_edges, new_points):
+    def rotate(self, rotate_func, new_map, new_edges, new_points, rev=False):
 
         for i in range(self.h):
 
             row_coords = self.get_row(i)
-            col_coords = self.get_col(rotate_func(i))
+            col_coords = self.get_col(rotate_func(i), rev=rev)
 
             for indx in range(self.w):
                 rx, ry = row_coords[indx]
@@ -119,8 +126,12 @@ class PixelMap(object):
             row.append((x, y))
         return row
 
-    def get_col(self, x):
+    def get_col(self, x, rev):
         col = []
-        for y in range(self.w):
+        if not rev:
+            r = range(self.w)
+        elif rev:
+            r = range(self.w-1, -1, -1)
+        for y in r:
             col.append((x, y))
         return col
