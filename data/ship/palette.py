@@ -13,12 +13,6 @@ class Palette(object):
 
     def __init__(self):
 
-        # self.component_list = [(bh.Rect, 0), (bh.Rect, 1), (bh.Square, 0),
-                               # (bh.AngleBottomRight, 0), (bh.Diamond, 0),
-                               # (bh.AngleTopRight, 0), (bh.AngleBottomLeft, 0),
-                               # (bh.AngleTopLeft, 0)]
-        #self.component_list = [(bh.Rect, 3), (bh.Rect, 1), (bh.Rect, 2), (ch.Circle, 0)]
-
         self.basic = randint(2, 6)
         self.connector = randint(1, 2)
         self.angles = randint(0, 1)

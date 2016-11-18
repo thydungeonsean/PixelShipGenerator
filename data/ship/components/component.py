@@ -1,8 +1,9 @@
 import pygame
 from ...constants import *
+from ..pixel_map import PixelMap
 
 
-class Component(object):
+class Component(PixelMap):
     
     """ This is the base class for a ship
     component. It should not be directly created.
@@ -12,40 +13,14 @@ class Component(object):
 
     def __init__(self, (w, h), coord=(0, 0), autocreate=True, autooutline=True):
 
-        self.w = w
-        self.h = h
-        
         self.x, self.y = coord
 
-        self.map = [[0 for my in range(h)] for mx in range(w)]
-        
-        self.points = set()
-        self.edges = set()
+        PixelMap.__init__(self, (w, h))
 
         if autocreate:
             self.create()
             if autooutline:
                 self.outline()
-
-    def set_image(self, c):
-
-        image = pygame.Surface((self.w, self.h))
-        image.fill(WHITE)
-
-        pix_array = pygame.PixelArray(image)
-        for y in range(self.h):
-            for x in range(self.w):
-                if self.map[x][y] == 1:
-                    pix_array[x, y] = c
-                elif self.map[x][y] == -1:
-                    pix_array[x, y] = BLACK
-
-        scaled = pygame.transform.scale(image, (scale(self.w), scale(self.h)))
-        image = scaled.convert()
-        image.set_colorkey(WHITE)
-        rect = image.get_rect()
-
-        return image, rect
 
     def create(self):
         pass
@@ -103,16 +78,6 @@ class Component(object):
 
         for tx, ty in trim:
             self.trim_edge((tx, ty))
-
-    def get_adj(self, (x, y)):
-
-        raw_adj = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-        adj = set()
-        for p in raw_adj:
-            if self.is_on_map(p):
-                adj.add(p)
-
-        return adj
        
     ##################################################################
     # realized this floodfill to outline was needlessly complicated
@@ -160,27 +125,6 @@ class Component(object):
         return edge
     ####################################################################
 
-    def is_on_map(self, (x, y)):
-
-        if 0 <= x < self.w and 0 <= y < self.h:
-            return True
-        else:
-            return False
-
-    def print_map(self):
-
-        for y in range(self.h):
-            line = ''
-            for x in range(self.w):
-                if self.map[x][y] == 0:
-                    new = '  '
-                elif self.map[x][y] == 1:
-                    new = ' #'
-                elif self.map[x][y] == -1:
-                    new = ' -'
-                line += new
-            print line
-
     def get_relative_points(self, edge=False):
 
         if edge:
@@ -216,20 +160,3 @@ class Component(object):
 
         self.x = x
         self.y = y
-
-    # transforming methods
-    def transform(self, direction):
-
-        new_w = self.h
-        new_h = self.w
-        new_map = [[0 for y in range(new_h)] for x in range(new_w)]
-        new_points = set()
-        new_edges = set()
-
-        # transpose coordinates
-
-        self.map = new_map
-        self.w = new_w
-        self.h = new_h
-        self.points = new_points
-        self.edges = new_edges

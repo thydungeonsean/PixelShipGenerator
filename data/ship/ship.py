@@ -1,5 +1,6 @@
 from random import *
 import time
+from pixel_map import PixelMap
 from ..constants import *
 from frame import Frame
 from palette import Palette
@@ -33,7 +34,7 @@ def set_ship_count():
         return 0
 
 
-class Ship(object):
+class Ship(PixelMap):
 
     """ The ship object is instantiated by generator.
     It holds a 2d list of the pixels of the ship and returns
@@ -64,9 +65,8 @@ class Ship(object):
         self.ship_id = str(Ship.count)
         Ship.count += 1
 
-        self.map = [[0 for y in range(h)] for x in range(w)]
-        self.w = w
-        self.h = h
+        PixelMap.__init__(self, (w, h))
+
         self.color = self.set_random_color()
         self.frame = self.set_frame()
         self.spine = self.frame.spine
@@ -79,12 +79,9 @@ class Ship(object):
         self.frame_size = self.frame.size
         self.points_in_frame = 0
 
-        self.pixels = set()
-        self.edges = set()
-
         self.generate_ship(animating)
 
-        self.image, self.rect = self.set_image()
+        self.image, self.rect = self.set_image(self.color)
         # print self.frame.layout
 
     def set_frame(self):
@@ -93,41 +90,15 @@ class Ship(object):
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
 
-    def pixel_on_map(self, (x, y)):
-
-        if 0 <= x < self.w and 0 <= y < self.h:
-            return True
-        else:
-            return False
-
     def change_pixel(self, (x, y), value):
 
-        if self.pixel_on_map((x, y)):
+        if self.is_on_map((x, y)):
             if value != 0:
                 self.map[x][y] = value
                 if value == 1:
-                    self.pixels.add((x, y))
+                    self.points.add((x, y))
                 elif value == -1:
                     self.edges.add((x, y))
-
-    def set_image(self):
-
-        image = pygame.Surface((self.w, self.h))
-        image.fill(BLACK)
-
-        pix_array = pygame.PixelArray(image)
-        for y in range(self.h):
-            for x in range(self.w):
-                if self.map[x][y] == 1:
-                    pix_array[x, y] = self.color
-                elif self.map[x][y] == -1:
-                    pix_array[x, y] = BLACK
-
-        scaled = pygame.transform.scale(image, (scale(self.w), scale(self.h)))
-        image = scaled.convert()
-        rect = image.get_rect()
-
-        return image, rect
 
     def get_image(self, frame=False, spine=False):
 
@@ -163,21 +134,6 @@ class Ship(object):
             ay = scale(y)
             pygame.draw.line(image, RED, (ax, ay), (ax, ay))
 
-    # for debugging
-    def print_map(self):
-
-        for y in range(self.h):
-            line = ''
-            for x in range(self.w):
-                if self.map[x][y] == 0:
-                    new = '  '
-                elif self.map[x][y] == 1:
-                    new = ' #'
-                elif self.map[x][y] == -1:
-                    new = ' -'
-                line += new
-            print line
-
     def attach(self, component):
 
         for x, y in component.points:
@@ -208,7 +164,7 @@ class Ship(object):
 
         rel_points = c.get_relative_points()
 
-        overlap = rel_points.intersection(self.pixels)
+        overlap = rel_points.intersection(self.points)
 
         if overlap:
             return True, len(overlap)
@@ -242,21 +198,21 @@ class Ship(object):
 
         self.move_and_check_placement(c, animating)
 
-    def grow_out_placement(self, c, animating):
+    # def grow_out_placement(self, c, animating):
 
         # find a point along existing edge of ship
         # generate a component containing that point
 
         # check - move until placed or x cycles
 
-        pass
+        # pass
 
     def move_and_check_placement(self, c, animating):
 
         placer = ComponentPlacer(self, c)
 
         if animating:
-            ci, cr = c.set_image(self.color)
+            ci, cr = c.set_image(self.color, fill_color=WHITE, colorkey=WHITE)
 
         # check if good position - adjust - iterate
         count = 0
@@ -316,17 +272,18 @@ class Ship(object):
         else:
             return False
 
-    def animate(self, c, ci, cr):
+    def animate(self, component, c_im, c_rct):
 
-        self.image, self.rect = self.set_image()
+        self.image, self.rect = self.set_image(self.color)
+        self.rect.topleft = (0, BUTTONMARGIN)
         screen = pygame.display.get_surface()
         screen.blit(self.image, self.rect)
 
-        x = scale(c.x)
-        y = scale(c.y)
-        cr.topleft = x, y
+        x = scale(component.x)
+        y = scale(component.y) + BUTTONMARGIN
+        c_rct.topleft = x, y
 
-        screen.blit(ci, cr)
+        screen.blit(c_im, c_rct)
         # time.sleep(0.05)
         pygame.display.update()
 
@@ -336,7 +293,7 @@ class Ship(object):
 
         for y in range(self.h):
             for x in range(self.w):
-                if (x, y) not in self.pixels and (x, y) not in self.edges:
+                if (x, y) not in self.points and (x, y) not in self.edges:
                     if self.point_is_gap((x, y)):
                         gaps.add((x, y))
 
@@ -349,7 +306,7 @@ class Ship(object):
                (x+1, y+1), (x-1, y+1), (x+1, y-1), (x-1, y-1))
         edges = 0
         for ax, ay in adj:
-            if self.pixel_on_map((ax, ay)) and self.map[ax][ay] == -1:
+            if self.is_on_map((ax, ay)) and self.map[ax][ay] == -1:
                 edges += 1
 
         return edges >= randint(5, 6)

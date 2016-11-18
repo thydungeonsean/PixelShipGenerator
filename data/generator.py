@@ -7,8 +7,8 @@ import os
 
 class Generator(State):
 
-    gridw = 8
-    gridh = 6
+    gridw = 1
+    gridh = 1
     gridsize = gridw * gridh
     grid_list = range(gridsize)
 
