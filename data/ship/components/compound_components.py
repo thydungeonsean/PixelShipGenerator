@@ -1,25 +1,27 @@
 from component import Component
-from basic_hull import *
+from angles import *
 
 
 class Diamond(Component):
 
     @classmethod
     def generate(cls, style=0):
-        w = randint(2, 7)
+        w = randint(4, 11)
         return cls(w)
 
     def __init__(self, w):
-        end_w = w * 2-1
-        Component.__init__(self, (end_w, end_w))
+        Component.__init__(self, (w, w))
 
     def create(self):
-
-        w = self.w/2 + 1
-        tl = AngleTopLeft(w, coord=(0, 0), autooutline=False)
-        tr = AngleTopRight(w, coord=(w-1, 0), autooutline=False)
-        bl = AngleBottomLeft(w, coord=(0, w-1),  autooutline=False)
-        br = AngleBottomRight(w, coord=(w-1, w-1), autooutline=False)
+        w = self.w / 2
+        tr = Angle((w, w), coord=(w, 0), autooutline=False)
+        br = Angle((w, w), coord=(w, w), autooutline=False)
+        br.transform('clockwise')
+        tl = Angle((w, w),  autooutline=False)
+        tl.transform('counter_clockwise')
+        bl = Angle((w, w), coord=(0, w), autooutline=False)
+        bl.transform('clockwise')
+        bl.transform('clockwise')
 
         for component in (tl, tr, bl, br):
 
@@ -41,11 +43,15 @@ class Circle(Component):
 
     def create(self):
 
-        w = self.w/2
-        tl = AngleTopLeft(w, coord=(0, 0), autooutline=False)
-        tr = AngleTopRight(w, coord=(w-1, 0), autooutline=False)
-        bl = AngleBottomLeft(w, coord=(0, w-1),  autooutline=False)
-        br = AngleBottomRight(w, coord=(w-1, w-1), autooutline=False)
+        w = self.w / 2
+        tr = Angle((w, w), coord=(w, 0), autooutline=False)
+        br = Angle((w, w), coord=(w, w), autooutline=False)
+        br.transform('clockwise')
+        tl = Angle((w, w),  autooutline=False)
+        tl.transform('counter_clockwise')
+        bl = Angle((w, w), coord=(0, w), autooutline=False)
+        bl.transform('clockwise')
+        bl.transform('clockwise')
 
         for component in (tl, tr, bl, br):
 

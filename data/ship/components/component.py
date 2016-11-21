@@ -17,6 +17,8 @@ class Component(PixelMap):
 
         PixelMap.__init__(self, (w, h))
 
+        self.name = 'generic'
+
         if autocreate:
             self.create()
             if autooutline:
@@ -24,22 +26,6 @@ class Component(PixelMap):
 
     def create(self):
         pass
-
-    def add_pixel(self, (x, y), value=1):
-
-        self.map[x][y] = value
-        self.points.add((x, y))
-
-    def add_edge(self, (x, y)):
-
-        self.map[x][y] = -1
-        self.edges.add((x, y))
-
-    def trim_edge(self, (x, y)):
-
-        self.map[x][y] = 0
-        self.edges.remove((x, y))
-        self.points.remove((x, y))
 
     def outline(self, trim=False):
     
@@ -58,6 +44,27 @@ class Component(PixelMap):
                     
         for px, py in outline:
             self.add_edge((px, py))
+
+        if trim:
+            self.trim_outline(outline)
+
+    # to be wrapped by outline in certain component types
+    def alt_outline(self, trim=False):
+
+        outline = set()
+
+        for y in range(self.h):
+            for x in range(self.w):
+                if self.map[x][y] >= 1:
+                    continue
+                adj = self.get_adj((x, y))
+                for ax, ay in adj:
+                    if self.map[ax][ay] >= 1:
+                        outline.add((x, y))
+                        break
+
+        for point in outline:
+            self.add_edge(point)
 
         if trim:
             self.trim_outline(outline)

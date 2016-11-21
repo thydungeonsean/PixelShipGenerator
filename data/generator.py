@@ -5,10 +5,13 @@ from button import Button
 import os
 
 
+anim = False
+
+
 class Generator(State):
 
-    gridw = 1
-    gridh = 1
+    gridw = 8
+    gridh = 6
     gridsize = gridw * gridh
     grid_list = range(gridsize)
 
@@ -26,7 +29,7 @@ class Generator(State):
         return grid
 
     @staticmethod
-    def generate_ship(w=descale(SHIPW), h=descale(SHIPH), animating=False):
+    def generate_ship(w=descale(SHIPW), h=descale(SHIPH), animating=anim):
         s = Ship((w, h), animating)
         return s
 
@@ -139,6 +142,15 @@ class Generator(State):
                 elif event.key == K_f:
                     self.toggle_frame()
 
+                elif event.key == K_v:
+                    self.transform('ver_flip')
+                elif event.key == K_h:
+                    self.transform('hor_flip')
+                elif event.key == K_n:
+                    self.transform('clockwise')
+                elif event.key == K_b:
+                    self.transform('counter_clockwise')
+
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 self.check_buttons(mouse_pos)
@@ -197,6 +209,14 @@ class Generator(State):
 
                     i, r = ship.get_image()
                     pygame.image.save(i, filename)
+
+    def transform(self, method):
+
+        for point in self.selection_grid.keys():
+            if self.selection_grid[point]:
+                ship = self.ship_grid[point]
+                ship.transform(method)
+                ship.update_image()
 
     def set_buttons(self):
 

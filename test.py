@@ -2,23 +2,24 @@ import pygame
 from pygame.locals import *
 from data.constants import *
 import data.ship.components.basic_hull as bh
+import data.ship.components.compound_components as cc
+import data.ship.components.curves as cv
 import time
+import data.ship.ship as ship
+from random import *
 
 
 s = pygame.display.get_surface()
 
-c = bh.AngleTopRight(80)
-i, r = c.set_image(RED, fill_color=WHITE)
-
-s.blit(i, r)
+c = cv.LongInvCurve.generate(randint(0, 3))
+c.update_image(RED, fill_color=WHITE)
+c.draw(s)
 
 pygame.display.update()
-time.sleep(.5)
+
+end = False
+while not end:
+    if pygame.event.wait().type == KEYDOWN:
+        end = True
+
 s.fill(BLACK)
-
-c.transform(method='counter_clockwise')
-i, r = c.set_image(RED, fill_color=WHITE)
-s.blit(i, r)
-
-pygame.display.update()
-time.sleep(2)

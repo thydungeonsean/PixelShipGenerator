@@ -4,6 +4,7 @@ from pixel_map import PixelMap
 from ..constants import *
 from frame import Frame
 from palette import Palette
+import component_placer as cp
 import os
 import sys
 
@@ -11,8 +12,6 @@ import sys
 def set_ship_count():
 
     pathname = os.pardir + '/exports/'
-    #pathname = '../exports/'
-    print pathname
 
     existing_pics = []
 
@@ -27,10 +26,8 @@ def set_ship_count():
             except ValueError:
                 pass
     if len(existing_pics) > 0:
-        print max(existing_pics)+1
         return max(existing_pics)+1
     else:
-        print 0
         return 0
 
 
@@ -40,10 +37,10 @@ class Ship(PixelMap):
     It holds a 2d list of the pixels of the ship and returns
     an image of the ship
 
-    Map:
-    0 - blank, not part of ship
-    -1 - black, part of ship, but to show texture
+    Map:ure
     1 - colored pixel
+    0 - blank, not part of ship
+    -1 - black, part of ship, but to show text
 
     """
 
@@ -60,10 +57,11 @@ class Ship(PixelMap):
         return r, g, b
         #return RED
 
-    def __init__(self, (w, h), animating=False):
+    def __init__(self, (w, h), animating=False, grid_coord=(0, 0)):
 
         self.ship_id = str(Ship.count)
         Ship.count += 1
+        self.grid_coord = grid_coord
 
         PixelMap.__init__(self, (w, h))
 
@@ -84,21 +82,33 @@ class Ship(PixelMap):
         self.image, self.rect = self.set_image(self.color)
         # print self.frame.layout
 
+    # pixel map funtions
+    def transform(self, method):
+        if method not in ('clockwise', 'counter_clockwise', 'ver_flip', 'hor_flip'):
+            print '***************** invalid transform keyword ********************'
+            return
+        self._transform(method)
+        self.update_id()
+
+    def update_id(self):
+        self.ship_id = str(Ship.count)
+        Ship.count += 1
+
     def set_frame(self):
 
         return Frame.rand_premade(self)
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
 
-    def change_pixel(self, (x, y), value):
-
-        if self.is_on_map((x, y)):
-            if value != 0:
-                self.map[x][y] = value
-                if value == 1:
-                    self.points.add((x, y))
-                elif value == -1:
-                    self.edges.add((x, y))
+    # def change_pixel(self, (x, y), value):
+    #
+    #     if self.is_on_map((x, y)):
+    #         if value != 0:
+    #             self.map[x][y] = value
+    #             if value == 1:
+    #                 self.points.add((x, y))
+    #             elif value == -1:
+    #                 self.edges.add((x, y))
 
     def get_image(self, frame=False, spine=False):
 
@@ -112,6 +122,9 @@ class Ship(PixelMap):
             i = self.image
 
         return i, self.rect
+
+    def update_image(self, fill_color=BLACK, colorkey=False):
+        self.image, self.rect = self.set_image(self.color, fill_color, colorkey)
 
     def show_frame(self, image):
 
@@ -136,10 +149,13 @@ class Ship(PixelMap):
 
     def attach(self, component):
 
-        for x, y in component.points:
+        points = component.points.copy()
+        points.update(component.edges)
+
+        for x, y in points:
             rx = x + component.x
             ry = y + component.y
-            self.change_pixel((rx, ry), component.map[x][y])
+            self.add_point((rx, ry), component.map[x][y])
 
             if self.frame.is_in_frame((rx, ry)):
                 self.points_in_frame += 1
@@ -209,10 +225,10 @@ class Ship(PixelMap):
 
     def move_and_check_placement(self, c, animating):
 
-        placer = ComponentPlacer(self, c)
+        placer = cp.ComponentPlacer(self, c)
 
         if animating:
-            ci, cr = c.set_image(self.color, fill_color=WHITE, colorkey=WHITE)
+            c.update_image(self.color, fill_color=WHITE, colorkey=WHITE)
 
         # check if good position - adjust - iterate
         count = 0
@@ -220,7 +236,7 @@ class Ship(PixelMap):
         while not attached:
 
             if animating:
-                self.animate(c, ci, cr)
+                self.animate(c)
 
             count += 1
             if count > 20:
@@ -250,6 +266,13 @@ class Ship(PixelMap):
             attached = connected
 
         self.attach(c)
+        if animating:
+            self.animate(c)
+            if c.name == 'angle':
+                print c.edges
+            while True:
+                if pygame.event.wait().type == KEYDOWN:
+                    return
 
     def generate_ship(self, animating=False):
 
@@ -258,6 +281,7 @@ class Ship(PixelMap):
 
             count += 1
             c = self.palette.get_component()
+
             self.add_component(c, animating)
             if count > 100:
                 break
@@ -272,18 +296,27 @@ class Ship(PixelMap):
         else:
             return False
 
-    def animate(self, component, c_im, c_rct):
+    def get_grid_coord(self):
 
-        self.image, self.rect = self.set_image(self.color)
-        self.rect.topleft = (0, BUTTONMARGIN)
+        x, y = self.grid_coord
+        x *= SHIPW
+        y *= SHIPH
+        y += BUTTONMARGIN
+        return x, y
+
+    def animate(self, component):
+
+        self.update_image(self.color)
+        sx, sy = self.get_grid_coord()
+        self.rect.topleft = (sx, sy)
         screen = pygame.display.get_surface()
-        screen.blit(self.image, self.rect)
+        self.draw(screen)
 
-        x = scale(component.x)
-        y = scale(component.y) + BUTTONMARGIN
-        c_rct.topleft = x, y
+        x = scale(component.x) + sx
+        y = scale(component.y) + sy
+        component.rect.topleft = x, y
 
-        screen.blit(c_im, c_rct)
+        component.draw(screen)
         # time.sleep(0.05)
         pygame.display.update()
 
@@ -298,7 +331,7 @@ class Ship(PixelMap):
                         gaps.add((x, y))
 
         for point in gaps:
-            self.change_pixel(point, 1)
+            self.change_point(point, 1)
 
     def point_is_gap(self, (x, y)):
 
@@ -310,170 +343,3 @@ class Ship(PixelMap):
                 edges += 1
 
         return edges >= randint(5, 6)
-
-
-class ComponentPlacer(object):
-
-    directions = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
-
-    def __init__(self, ship, component):
-
-        self.ship = ship
-        self.component = component
-
-        self.move_log = []
-        self.move_dict = {}
-
-        self.vector = None
-        self.vector_log = []
-
-        self.reversed_once = False
-
-    def record(self, pos, state):
-
-        self.move_log.append(pos)
-        self.move_dict[pos] = state
-
-    @property
-    def current_position(self):
-        if len(self.move_log) < 1:
-            return None
-        return self.move_log[-1]
-
-    @property
-    def current_state(self):
-        if self.current_position is None:
-            return None
-        return self.move_dict[self.current_position]
-
-    @property
-    def previous_position(self):
-        if len(self.move_log) > 1:
-            return self.move_log[-2]
-        return None
-
-    @property
-    def previous_state(self):
-        if self.previous_position is None:
-            return None
-        return self.move_dict[self.previous_position]
-
-    def place(self, start=randint(0, 1)):
-
-        # if this is first placement of component, we do it randomly within the frame
-        if not self.move_log:
-            if start == 0:
-                return self.get_start_point_in_frame()
-            elif start == 1:
-                return self.get_start_point_on_edge()
-
-        current_state = self.current_state
-        previous_state = self.previous_state
-
-        # if component is not connected to ship or spine, we try to shift it to the center of
-        # the map hopefully to connect
-        if current_state == 'unconnected':
-            if previous_state == 'unconnected' or previous_state is None:
-                self.move_towards_center()
-                return self.move_on_vector()
-            elif not self.reversed_once:  # we went from connected to unconnected - no good, find new solution
-                self.reverse_vector()
-                self.reversed_once = True
-                return self.move_on_vector()
-            else:
-                self.reversed_once = False
-                self.set_random_vector()
-                return self.move_on_vector()
-
-        # if we are connected but overlapping, try and move so that we reduce amount overlapping
-        # at beginning, pick a random direction
-        if previous_state is None or previous_state == 'unconnected':
-            self.set_random_vector()
-            return self.move_on_vector()
-
-        if previous_state <= current_state:
-            # keep going same way
-            return self.move_on_vector()
-
-        if previous_state > current_state:
-            self.set_new_vector()
-            return self.move_on_vector()
-
-    def set_new_vector(self):
-
-        previous = set(self.vector_log)
-        diff = tuple(set(ComponentPlacer.directions).difference(previous))
-        if not diff:
-            self.set_random_vector()
-        else:
-            choice(diff)
-
-    def reverse_vector(self):
-        new = []
-        for i in self.vector:
-            if i == 1:
-                n = -1
-            elif i == 0:
-                n = 0
-            elif i == -1:
-                n = 1
-            new.append(n)
-        new_vector = tuple(new)
-        self.change_vector(new_vector)
-
-    def move_on_vector(self):
-        dx, dy = self.vector
-        cx, cy = self.current_position
-        return dx + cx, dy + cy
-
-    def set_random_vector(self):
-        vector = choice(ComponentPlacer.directions)
-        self.update_vector(vector)
-
-    def update_vector(self, vector):
-        self.vector_log = []
-        self.vector = vector
-
-    def change_vector(self, new):
-        self.vector_log.append(self.vector)
-        self.vector = new
-
-    def move_towards_center(self):
-
-        cx, cy = self.current_position
-        if cx >= self.component.w / 2:
-            dx = -1
-        else:
-            dx = 1
-        if cy >= self.component.h / 2:
-            dy = -1
-        else:
-            dy = 1
-        self.update_vector((dx, dy))
-
-    def get_start_point_in_frame(self):
-
-        c = self.component
-
-        ix, iy = self.ship.frame.point_in_frame()
-        xvar = c.w / 2
-        yvar = c.h / 2
-        ix += randint(-xvar, xvar)
-        iy += randint(-yvar, yvar)
-
-        return ix, iy
-
-    def get_start_point_on_edge(self):
-
-        if not self.ship.edges:
-            return self.get_start_point_in_frame()
-
-        c = self.component
-
-        ix, iy = choice(tuple(self.ship.edges))
-        xvar = c.w / 2
-        yvar = c.h / 2
-        ix += randint(-xvar, xvar)
-        iy += randint(-yvar, yvar)
-
-        return ix, iy

@@ -13,6 +13,10 @@ class PixelMap(object):
         self.points = set()
         self.edges = set()
 
+        self.image = None
+        self.rect = None
+
+    # image functions
     def set_image(self, color, fill_color=BLACK, colorkey=False):
 
         image = pygame.Surface((self.w, self.h))
@@ -36,6 +40,12 @@ class PixelMap(object):
 
         return image, rect
 
+    def update_image(self, color, fill_color=BLACK, colorkey=False):
+        self.image, self.rect = self.set_image(color, fill_color, colorkey)
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
     # for debugging
     def print_map(self):
 
@@ -50,6 +60,39 @@ class PixelMap(object):
                     new = ' -'
                 line += new
             print line
+
+    # map functions
+    def add_point(self, (x, y), value=1):
+        if not self.is_on_map((x, y)):
+            print 'trying to add off of map'
+            return
+        if value >= 1:
+            self.add_pixel((x, y), value)
+        elif value == -1:
+            self.add_edge((x, y))
+
+    def add_pixel(self, (x, y), value=1):
+
+        self.map[x][y] = value
+        self.points.add((x, y))
+
+    def add_edge(self, (x, y)):
+
+        self.map[x][y] = -1
+        self.edges.add((x, y))
+
+    def change_point(self, (x, y), value):
+
+        self.trim_point((x, y))
+        self.add_point((x, y), value)
+
+    def trim_point(self, (x, y)):
+
+        self.map[x][y] = 0
+        if (x, y) in self.edges:
+            self.edges.remove((x, y))
+        if (x, y) in self.points:
+            self.points.remove((x, y))
 
     def is_on_map(self, (x, y)):
 
@@ -68,11 +111,26 @@ class PixelMap(object):
 
         return adj
 
-    # transforming methods
-    def transform(self, method='clockwise'):
-        
-        new_w = self.h
-        new_h = self.w
+    # transform map
+    ''' transforming methods - must take 'clockwise, counter_clockwise, ver_flip, hor_flip'
+    transform is wrapper for _transform to allow overriding in child classes'''
+    def transform(self, method):
+        if method not in ('clockwise', 'counter_clockwise', 'ver_flip', 'hor_flip'):
+            print '***************** invalid transform keyword ********************'
+            return
+        self._transform(method)
+
+    def _transform(self, method):
+
+        if method in ('clockwise', 'counter_clockwise'):
+            rotate = True
+            new_w = self.h
+            new_h = self.w
+        else:
+            rotate = False
+            new_w = self.w
+            new_h = self.h
+
         new_map = [[0 for y in range(new_h)] for x in range(new_w)]
         new_points = set()
         new_edges = set()
@@ -80,15 +138,26 @@ class PixelMap(object):
         # set arguments for rotate function
         function_map = {
             'clockwise': self.clockwise_offset,
-            'counter_clockwise': self.counter_clockwise_offset
+            'counter_clockwise': self.counter_clockwise_offset,
+            'ver_flip': self.ver_flip,
+            'hor_flip': self.hor_flip
             }
         rev_map = {
             'clockwise': False,
-            'counter_clockwise': True
+            'counter_clockwise': True,
+            'ver_flip': False,
+            'hor_flip': True
             }
-        
+        row_col_map = {
+            'clockwise': self.get_col,
+            'counter_clockwise': self.get_col,
+            'ver_flip': self.get_row,
+            'hor_flip': self.get_row
+        }
+
+        new = (new_map, new_points, new_edges)
         # transpose coordinates
-        self.rotate(function_map[method], new_map, new_edges, new_points, rev=rev_map[method])
+        self.modify_map(function_map[method], row_col_map[method], new, rev=rev_map[method], rotate=rotate)
 
         # replace map attributes
         self.map = new_map
@@ -97,36 +166,52 @@ class PixelMap(object):
         self.points = new_points
         self.edges = new_edges
 
-    def rotate(self, rotate_func, new_map, new_edges, new_points, rev=False):
+    def assign_new(self, (x, y), value, map, edges, points):
+        map[x][y] = value
+        if value == -1:
+            edges.add((x, y))
+        elif value == 1:
+            points.add((x, y))
+
+    def modify_map(self, mod_func, row_col_func, new, rev=False, rotate=False):
+
+        new_map, new_points, new_edges = new
 
         for i in range(self.h):
 
-            row_coords = self.get_row(i)
-            col_coords = self.get_col(rotate_func(i), rev=rev)
+            row_a = self.get_row(i)
+            row_b = row_col_func(mod_func(i), rev=rev)
 
-            for indx in range(self.w):
-                rx, ry = row_coords[indx]
-                cx, cy = col_coords[indx]
-                value = self.map[rx][ry]
-                new_map[cx][cy] = value
-                if value == -1:
-                    new_edges.add(value)
-                elif value == 1:
-                    new_points.add(value)
+            for indx in range(len(row_a)):
+                ax, ay = row_a[indx]
+                bx, by = row_b[indx]
+                value = self.map[ax][ay]
+                self.assign_new((bx, by), value, new_map, new_edges, new_points)
 
+    # transforming parameter helper functions
     def clockwise_offset(self, i):
         return self.h - 1 - i
 
     def counter_clockwise_offset(self, i):
         return i
 
-    def get_row(self, y):
+    def ver_flip(self, i):
+        return self.h - 1 - i
+
+    def hor_flip(self, i):
+        return i
+
+    def get_row(self, y, rev=False):
         row = []
-        for x in range(self.w):
+        if not rev:
+            r = range(self.w)
+        elif rev:
+            r = range(self.w-1, -1, -1)
+        for x in r:
             row.append((x, y))
         return row
 
-    def get_col(self, x, rev):
+    def get_col(self, x, rev=False):
         col = []
         if not rev:
             r = range(self.w)

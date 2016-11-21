@@ -23,6 +23,8 @@ class TitleScreen(State):
 
                 else:
                     self.main.start_generator()
+            elif event.type == MOUSEBUTTONDOWN:
+                self.main.start_generator()
 
     def draw(self, surface):
 
