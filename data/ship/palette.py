@@ -43,8 +43,8 @@ class Palette(object):
         for i in range(self.connector):
             c_list.append(choice(Palette.connector))
 
-        for i in range(self.angles):
-            c_list.append(choice(Palette.angles))
+        # for i in range(self.angles):
+        #     c_list.append(choice(Palette.angles))
 
         for i in range(self.curves):
             c_list.append(choice(Palette.curves))

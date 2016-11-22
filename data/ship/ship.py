@@ -79,7 +79,7 @@ class Ship(PixelMap):
 
         self.generate_ship(animating)
 
-        self.image, self.rect = self.set_image(self.color)
+        self.image, self.rect = self.set_image(self.color, fill_color=WHITE)
         # print self.frame.layout
 
     # pixel map funtions
@@ -90,6 +90,7 @@ class Ship(PixelMap):
         self._transform(method)
         self.update_id()
 
+    # ship attributes
     def update_id(self):
         self.ship_id = str(Ship.count)
         Ship.count += 1
@@ -100,16 +101,7 @@ class Ship(PixelMap):
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
 
-    # def change_pixel(self, (x, y), value):
-    #
-    #     if self.is_on_map((x, y)):
-    #         if value != 0:
-    #             self.map[x][y] = value
-    #             if value == 1:
-    #                 self.points.add((x, y))
-    #             elif value == -1:
-    #                 self.edges.add((x, y))
-
+    # image methods
     def get_image(self, frame=False, spine=False):
 
         if frame or spine:
@@ -123,7 +115,7 @@ class Ship(PixelMap):
 
         return i, self.rect
 
-    def update_image(self, fill_color=BLACK, colorkey=False):
+    def update_image(self, color=None, fill_color=BLACK, colorkey=False):
         self.image, self.rect = self.set_image(self.color, fill_color, colorkey)
 
     def show_frame(self, image):
@@ -147,6 +139,26 @@ class Ship(PixelMap):
             ay = scale(y)
             pygame.draw.line(image, RED, (ax, ay), (ax, ay))
 
+    # msin ship generating algorithm
+    def generate_ship(self, animating=False):
+
+        count = 0
+        while self.frame_not_full():
+
+            count += 1
+            c = self.palette.get_component()
+
+            self.add_component(c, animating)
+            if count > 100:
+                break
+
+        self.fill_gaps()
+        self.complete_outline()
+        self.clear_edge()
+
+        self.check_connected()
+
+    # component adding methods
     def attach(self, component):
 
         points = component.points.copy()
@@ -160,49 +172,8 @@ class Ship(PixelMap):
             if self.frame.is_in_frame((rx, ry)):
                 self.points_in_frame += 1
 
-    def is_connected_to_ship(self, c):
-
-        rel_points = c.get_relative_points()
-
-        # check if connected to spine
-        on_spine = rel_points.intersection(self.spine.points)
-        if on_spine:
-            return True
-
-        rel_edges = c.get_relative_points(edge=True)
-        on_edges = rel_edges.intersection(c.edges)
-        if on_edges:
-            return True
-
-        return False
-
-    def is_overlapping(self, c):
-
-        rel_points = c.get_relative_points()
-
-        overlap = rel_points.intersection(self.points)
-
-        if overlap:
-            return True, len(overlap)
-        else:
-            return False, 0
-
-    def is_in_frame(self, c):
-
-        rel_points = c.get_relative_points()
-        max = float(len(rel_points))
-        in_frame = 0
-
-        for point in rel_points:
-            if self.frame.is_in_frame(point):
-                in_frame += 1
-
-        ratio = in_frame / max
-        if ratio >= self.conformity:
-            return True
-        return False
-
     def add_component(self, component, animating):
+
 
         # select a start position on ship map
         # check if connected
@@ -213,15 +184,6 @@ class Ship(PixelMap):
         c = component
 
         self.move_and_check_placement(c, animating)
-
-    # def grow_out_placement(self, c, animating):
-
-        # find a point along existing edge of ship
-        # generate a component containing that point
-
-        # check - move until placed or x cycles
-
-        # pass
 
     def move_and_check_placement(self, c, animating):
 
@@ -247,18 +209,18 @@ class Ship(PixelMap):
             c.move(position)
 
             # check if component on spine, or attached to existing components
-            connected = self.is_connected_to_ship(c)
+            connected = c.is_connected_to_ship(self)
             if not connected:
                 placer.record(position, 'unconnected')
                 continue
 
             # check if component overlaps existing components
-            overlapping, over = self.is_overlapping(c)
+            overlapping, over = c.is_overlapping(self)
             if overlapping:
                 placer.record(position, over)
                 continue
 
-            in_frame = self.is_in_frame(c)
+            in_frame = c.is_in_frame(self)
             if not in_frame:
                 placer.record(position, 0)
                 continue
@@ -268,25 +230,10 @@ class Ship(PixelMap):
         self.attach(c)
         if animating:
             self.animate(c)
-            if c.name == 'angle':
-                print c.edges
+
             while True:
                 if pygame.event.wait().type == KEYDOWN:
                     return
-
-    def generate_ship(self, animating=False):
-
-        count = 0
-        while self.frame_not_full():
-
-            count += 1
-            c = self.palette.get_component()
-
-            self.add_component(c, animating)
-            if count > 100:
-                break
-
-        self.fill_gaps()
 
     def frame_not_full(self):
         ratio = self.points_in_frame / float(self.frame_size)
@@ -304,6 +251,7 @@ class Ship(PixelMap):
         y += BUTTONMARGIN
         return x, y
 
+    # for debugging
     def animate(self, component):
 
         self.update_image(self.color)
@@ -320,6 +268,7 @@ class Ship(PixelMap):
         # time.sleep(0.05)
         pygame.display.update()
 
+    # post generation modification
     def fill_gaps(self):
 
         gaps = set()
@@ -343,3 +292,94 @@ class Ship(PixelMap):
                 edges += 1
 
         return edges >= randint(5, 6)
+
+    def complete_outline(self):
+
+        outline = set()
+
+        for y in range(self.h):
+            for x in range(self.w):
+                tile = self.map[x][y]
+                if tile >= 1 or tile == -1:
+                    continue
+                adj = self.get_adj((x, y))
+                for ax, ay in adj:
+                    if self.map[ax][ay] >= 1:
+                        outline.add((x, y))
+                        break
+
+        for point in outline:
+            self.add_edge(point)
+
+    def clear_edge(self):
+
+        for y in range(self.h):
+            for x in range(self.w):
+                if y == 0 or y == self.h-1 or x == 0 or x == self.w-1:
+                    if self.map[x][y] != 0:
+                        self.trim_point((x, y))
+
+    def check_connected(self):
+
+        connection_map = PixelMap((self.w, self.h))
+
+        ship_chunks = self.get_chunks()
+        for k, v in ship_chunks.items():
+            connection_map.add_point(k, v)
+
+        connection_map.print_map()
+
+    def get_chunks(self):
+
+        chunk_dict = {}
+
+        chunk_id = 0
+
+        for y in range(self.h):
+            for x in range(self.w):
+                if self.map[x][y] == 0:
+                    continue
+                try:
+                    chunk_dict[(x, y)]
+                except KeyError:  # only try flood filling if it's not part of a chunk already
+                    chunk_id += 1
+                    self.flood_chunk((x, y), chunk_dict, chunk_id)
+
+        print chunk_id
+
+        return chunk_dict
+
+    def flood_chunk(self, (x, y), dict, tag):
+
+        dict[(x, y)] = tag
+
+        queue = [(x, y)]
+
+        complete = False
+
+        while not complete:
+
+            queue = self.flood(queue, dict, tag)
+
+            if not queue:
+                complete = True
+
+    def flood(self, queue, dict, tag):
+
+        next_queue = []
+
+        for point in queue:
+
+            neighbours = self.get_adj(point)
+
+            for p in neighbours:
+                x, y = p
+                if self.map[x][y] == 0:
+                    continue
+                try:
+                    dict[p]
+                except KeyError:
+                    dict[p] = tag
+                    next_queue.append(p)
+
+        return next_queue

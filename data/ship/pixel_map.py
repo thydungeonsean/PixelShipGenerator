@@ -54,7 +54,7 @@ class PixelMap(object):
             for x in range(self.w):
                 if self.map[x][y] == 0:
                     new = '  '
-                elif self.map[x][y] == 1:
+                elif self.map[x][y] >= 1:
                     new = ' #'
                 elif self.map[x][y] == -1:
                     new = ' -'
@@ -64,7 +64,6 @@ class PixelMap(object):
     # map functions
     def add_point(self, (x, y), value=1):
         if not self.is_on_map((x, y)):
-            print 'trying to add off of map'
             return
         if value >= 1:
             self.add_pixel((x, y), value)

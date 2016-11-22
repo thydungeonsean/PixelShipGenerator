@@ -167,3 +167,46 @@ class Component(PixelMap):
 
         self.x = x
         self.y = y
+
+    # adding to ship
+    def is_connected_to_ship(self, ship):
+
+        rel_points = self.get_relative_points()
+
+        # check if connected to spine
+        on_spine = rel_points.intersection(ship.spine.points)
+        if on_spine:
+            return True
+
+        rel_edges = self.get_relative_points(edge=True)
+        on_edges = rel_edges.intersection(self.edges)
+        if on_edges:
+            return True
+
+        return False
+
+    def is_overlapping(self, ship):
+
+        rel_points = self.get_relative_points()
+
+        overlap = rel_points.intersection(ship.points)
+
+        if overlap:
+            return True, len(overlap)
+        else:
+            return False, 0
+
+    def is_in_frame(self, ship):
+
+        rel_points = self.get_relative_points()
+        max = float(len(rel_points))
+        in_frame = 0
+
+        for point in rel_points:
+            if ship.frame.is_in_frame(point):
+                in_frame += 1
+
+        ratio = in_frame / max
+        if ratio >= ship.conformity:
+            return True
+        return False

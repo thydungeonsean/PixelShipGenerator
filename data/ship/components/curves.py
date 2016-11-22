@@ -7,19 +7,19 @@ class LongInvCurve(Component):
 
     @classmethod
     def generate_br_down(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         return cls(h)
 
     @classmethod
     def generate_br_up(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('ver_flip')
         return crv
 
     @classmethod
     def generate_bl_up(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('ver_flip')
         crv.transform('hor_flip')
@@ -27,7 +27,7 @@ class LongInvCurve(Component):
 
     @classmethod
     def generate_bl_down(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('hor_flip')
         return crv
@@ -83,19 +83,19 @@ class LongCurve(Component):
 
     @classmethod
     def generate_br_down(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         return cls(h)
 
     @classmethod
     def generate_br_up(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('ver_flip')
         return crv
 
     @classmethod
     def generate_bl_up(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('ver_flip')
         crv.transform('hor_flip')
@@ -103,7 +103,7 @@ class LongCurve(Component):
 
     @classmethod
     def generate_bl_down(cls):
-        h = randint(3, 7)
+        h = randint(3, 5)
         crv = cls(h)
         crv.transform('hor_flip')
         return crv
