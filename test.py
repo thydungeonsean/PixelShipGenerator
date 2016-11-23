@@ -26,4 +26,3 @@ from random import *
 # s.fill(BLACK)
 
 ship1 = s.Ship((50, 50))
-ship1.check_connected()
