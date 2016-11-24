@@ -20,8 +20,8 @@ class Palette(object):
 
         self.basic = randint(2, 6)
         self.connector = randint(0, 2)
-        self.angles = randint(1, 1)
-        self.curves = randint(1, 5)
+        self.angles = randint(0, 1)
+        self.curves = randint(0, 2)
         self.special = randint(0, 1)
 
         self.component_list = self.set_component_list()
@@ -43,8 +43,8 @@ class Palette(object):
         for i in range(self.connector):
             c_list.append(choice(Palette.connector))
 
-        # for i in range(self.angles):
-        #     c_list.append(choice(Palette.angles))
+        for i in range(self.angles):
+            c_list.append(choice(Palette.angles))
 
         for i in range(self.curves):
             c_list.append(choice(Palette.curves))

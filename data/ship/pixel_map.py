@@ -115,13 +115,21 @@ class PixelMap(object):
         # map must be a pixel map of same size as calling instance
         # completely overwrites existing map with argument's data
 
-        self.points = set()
-        self.edges = set()
+        self.new_map()
 
         for y in range(pixel_map.h):
             for x in range(pixel_map.w):
                 value = pixel_map.map[x][y]
                 self.add_point((x, y), value)
+
+    def new_map(self):
+
+        for y in range(self.h):
+            for x in range(self.w):
+                self.map[x][y] = 0
+
+        self.points = set()
+        self.edges = set()
 
     # transform map
     ''' transforming methods - must take 'clockwise, counter_clockwise, ver_flip, hor_flip'
