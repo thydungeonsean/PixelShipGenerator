@@ -164,13 +164,13 @@ class Generator(State):
                     self.toggle_frame()
 
                 elif event.key == K_v:
-                    self.transform('ver_flip')
+                    self.ver_flip()
                 elif event.key == K_h:
-                    self.transform('hor_flip')
+                    self.hor_flip()
                 elif event.key == K_n:
-                    self.transform('clockwise')
+                    self.clockwise()
                 elif event.key == K_b:
-                    self.transform('counter_clockwise')
+                    self.counter_clockwise()
 
             elif event.type == MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -241,14 +241,33 @@ class Generator(State):
                 ship.update_image()
                 self.saved_grid[point] = False
 
+    def ver_flip(self):
+        self.transform('ver_flip')
+
+    def hor_flip(self):
+        self.transform('hor_flip')
+
+    def clockwise(self):
+        self.transform('clockwise')
+
+    def counter_clockwise(self):
+        self.transform('counter_clockwise')
+
     def set_buttons(self):
 
         bw = 78
+        sbw = 24
 
         buttons = [Button('generate', (0, 0), self.toggle_generate_mode),
                    Button('save', (bw, 0), self.save),
                    Button('select', (2*bw, 0), self.select),
                    Button('deselect', (3*bw, 0), self.deselect),
+                   Button('clkws', (4*bw, 0), self.clockwise),
+                   Button('cntrclkws', (4*bw+sbw, 0), self.counter_clockwise),
+                   Button('flipv', (4*bw+2*sbw, 0), self.ver_flip),
+                   Button('fliph', (4*bw+3*sbw, 0), self.hor_flip),
+                   Button('color_rand', (4*bw + 4*sbw, 0), self.reset_color_palette),
+                   Button('color_mono_vary', (4*bw + 5*sbw, 0), self.toggle_mono),
                    Button('i', (SCREENWIDTH-24, 0), self.main.show_instructions)]
 
         return buttons
@@ -306,3 +325,19 @@ class Generator(State):
             self.generating = False
         else:
             self.generating = True
+
+    def reset_color_palette(self):
+
+        for point in self.selection_grid.keys():
+            if self.selection_grid[point]:
+                ship = self.ship_grid[point]
+                ship.reset_color_palette()
+                self.saved_grid[point] = False
+
+    def toggle_mono(self):
+
+        for point in self.selection_grid.keys():
+            if self.selection_grid[point]:
+                ship = self.ship_grid[point]
+                ship.toggle_mono_color()
+                self.saved_grid[point] = False

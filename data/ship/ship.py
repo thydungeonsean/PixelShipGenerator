@@ -65,8 +65,10 @@ class Ship(PixelMap):
 
         PixelMap.__init__(self, (w, h))
 
-        self.color_palette = color_gen.ColorPalette(4, variance=60)
+        self.color_palette = self.set_color_palette()
         self.color = self.color_palette.base
+        self.mono = False
+
         self.frame = self.set_frame()
         self.spine = self.frame.spine
         self.palette = Palette()
@@ -197,7 +199,27 @@ class Ship(PixelMap):
             pygame.draw.line(image, RED, (ax, ay), (ax, ay))
 
     def get_color(self, color_code):
-        return self.color_palette.palette[color_code]
+        if not self.mono:
+            return self.color_palette.palette[color_code]
+        elif self.mono:
+            return self.color_palette.palette[1]
+
+    def toggle_mono_color(self):
+        if self.mono:
+            self.mono = False
+        else:
+            self.mono = True
+        self.update_image()
+        self.update_id()
+
+    @staticmethod
+    def set_color_palette():
+        return color_gen.ColorPalette(4, variance=60)
+
+    def reset_color_palette(self):
+        self.color_palette = color_gen.ColorPalette(4, variance=60)
+        self.update_image()
+        self.update_id()
 
     # msin ship generating algorithm
     def generate_ship(self, animating=False):
