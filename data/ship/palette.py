@@ -20,16 +20,17 @@ class Palette(object):
 
         self.basic = randint(2, 6)
         self.connector = randint(0, 2)
-        self.angles = randint(0, 1)
-        self.curves = randint(0, 2)
+        self.angles = randint(0, 0)
+        self.curves = randint(0, 0)
         self.special = randint(0, 1)
 
         self.component_list = self.set_component_list()
 
-    def get_component(self):
+    def get_component(self, color_code):
 
         generator, style = choice(self.component_list)
         component = generator.generate(style)
+        component.set_color_code(color_code)
 
         return component
 

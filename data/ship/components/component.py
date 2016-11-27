@@ -14,6 +14,7 @@ class Component(PixelMap):
     def __init__(self, (w, h), coord=(0, 0), autocreate=True, autooutline=True):
 
         self.x, self.y = coord
+        self.color_code = None
 
         PixelMap.__init__(self, (w, h))
 
@@ -23,6 +24,19 @@ class Component(PixelMap):
             self.create()
             if autooutline:
                 self.outline()
+
+    def set_color_code(self, code):
+        self.color_code = code
+
+        for y in range(self.h):
+            for x in range(self.w):
+                if self.map[x][y] >= 1:
+                    self.map[x][y] = self.color_code
+
+    def add_pixel(self, (x, y), value=1):
+
+        self.map[x][y] = value
+        self.points.add((x, y))
 
     def create(self):
         pass
@@ -77,14 +91,14 @@ class Component(PixelMap):
             adj = self.get_adj((x, y))
             next_to_pixel = False
             for ax, ay in adj:
-                if self.map[ax][ay] == 1:
+                if self.map[ax][ay] >= 1:
                     next_to_pixel = True
                     break
             if not next_to_pixel:
                 trim.add((x, y))
 
         for tx, ty in trim:
-            self.trim_edge((tx, ty))
+            self.trim_point((tx, ty))
        
     ##################################################################
     # realized this floodfill to outline was needlessly complicated

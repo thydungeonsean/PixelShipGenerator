@@ -8,6 +8,7 @@ import component_placer as cp
 import ship_connector as sc
 import os
 import sys
+import color_gen
 
 
 def set_ship_count():
@@ -64,7 +65,8 @@ class Ship(PixelMap):
 
         PixelMap.__init__(self, (w, h))
 
-        self.color = self.set_random_color()
+        self.color_palette = color_gen.ColorPalette(4, variance=60)
+        self.color = self.color_palette.base
         self.frame = self.set_frame()
         self.spine = self.frame.spine
         self.palette = Palette()
@@ -78,8 +80,7 @@ class Ship(PixelMap):
 
         self.generate_ship(animating)
 
-        self.image, self.rect = self.set_image(self.color, fill_color=WHITE)
-        # print self.frame.layout
+        self.image, self.rect = self.set_image()
 
     # pixel map funtions
     def transform(self, method):
@@ -88,6 +89,66 @@ class Ship(PixelMap):
             return
         self._transform(method)
         self.update_id()
+
+    def center_ship(self, update=True):
+
+        center_point = self.get_center()
+
+        map_center = (self.w / 2, self.h / 2)
+
+        move_mod = (map_center[0]-center_point[0], map_center[1]-center_point[1])
+        self.shift_map(move_mod)
+
+        self.update_image()
+
+    def shift_map(self, (mx, my)):
+
+        points = self.points.copy()
+        points.update(self.edges)
+
+        new_map = {}
+
+        for px, py in points:
+            nx = px + mx
+            ny = py + my
+            new_map[(nx, ny)] = self.map[px][py]
+
+        self.new_map()
+
+        for (x, y), v in new_map.items():
+            self.add_point((x, y), v)
+
+    def get_center(self):
+
+        tot_x = 0
+        tot_y = 0
+        points = self.points.copy()
+        points.update(self.edges)
+        length = len(points)
+
+        for x, y in points:
+            tot_x += x
+            tot_y += y
+
+        avg_x = tot_x / length
+        avg_y = tot_y / length
+
+        if (avg_x, avg_y) in points:
+            return avg_x, avg_y
+
+        # if the avg point isn't part of the ship, we choose the point in the ship
+        # closest to the average
+        closest = {}
+        lowest = length
+        for x, y in points:
+            v = abs(x - avg_x) + abs(y - avg_y)
+            if v < lowest:
+                closest[v] = (x, y)
+                if v == 1:
+                    return closest[v]
+        low_key = min(closest.keys())
+
+        return closest[low_key]
 
     # ship attributes
     def update_id(self):
@@ -114,9 +175,6 @@ class Ship(PixelMap):
 
         return i, self.rect
 
-    def update_image(self, color=None, fill_color=BLACK, colorkey=False):
-        self.image, self.rect = self.set_image(self.color, fill_color, colorkey)
-
     def show_frame(self, image):
 
         for zone in self.frame.zones:
@@ -137,6 +195,9 @@ class Ship(PixelMap):
             ay = scale(y)
             pygame.draw.line(image, RED, (ax, ay), (ax, ay))
 
+    def get_color(self, color_code):
+        return self.color_palette.palette[color_code]
+
     # msin ship generating algorithm
     def generate_ship(self, animating=False):
 
@@ -144,7 +205,7 @@ class Ship(PixelMap):
         while self.frame_not_full():
 
             count += 1
-            c = self.palette.get_component()
+            c = self.palette.get_component(self.color_palette.get_color())
 
             self.add_component(c, animating)
             if count > 100:
@@ -155,6 +216,8 @@ class Ship(PixelMap):
         self.clear_edge()
 
         self.check_connected()
+
+        self.center_ship(update=False)
 
     # component adding methods
     def attach(self, component):
@@ -320,9 +383,7 @@ class Ship(PixelMap):
     def check_connected(self):
 
         ship_chunks, number = sc.ShipConnector.get_chunk_dict(self)
-        print 'checking'
         if number > 1:
-            print 'more than 1 chunk '
             connector = sc.ShipConnector(self, ship_chunks, number)
             connector.connect_chunks()
             self.copy(connector)

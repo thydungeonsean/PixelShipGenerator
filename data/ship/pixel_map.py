@@ -3,7 +3,7 @@ from ..constants import *
 
 class PixelMap(object):
 
-    def __init__(self, (w, h)):
+    def __init__(self, (w, h), colorkey=False):
 
         self.w = w
         self.h = h
@@ -15,33 +15,39 @@ class PixelMap(object):
 
         self.image = None
         self.rect = None
+        self.color = None
+        self.fill_color = BLACK
+        self.colorkey = colorkey
 
     # image functions
-    def set_image(self, color, fill_color=BLACK, colorkey=False):
+    def set_image(self):
 
         image = pygame.Surface((self.w, self.h))
-        image.fill(fill_color)
+        image.fill(self.fill_color)
 
         pix_array = pygame.PixelArray(image)
         for y in range(self.h):
             for x in range(self.w):
-                if self.map[x][y] == 1:
-                    pix_array[x, y] = color
+                if self.map[x][y] >= 1:
+                    pix_array[x, y] = self.get_color(self.map[x][y])
                 elif self.map[x][y] == -1:
                     pix_array[x, y] = BLACK
 
         scaled = pygame.transform.scale(image, (scale(self.w), scale(self.h)))
         image = scaled.convert()
 
-        if colorkey:
+        if self.colorkey:
             image.set_colorkey(WHITE)
 
         rect = image.get_rect()
 
         return image, rect
 
-    def update_image(self, color, fill_color=BLACK, colorkey=False):
-        self.image, self.rect = self.set_image(color, fill_color, colorkey)
+    def get_color(self, color_code):
+        return self.color
+
+    def update_image(self):
+        self.image, self.rect = self.set_image()
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

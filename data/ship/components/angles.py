@@ -75,7 +75,7 @@ class Angle(Component):
         self.m = float(h) / w
         self.b = b
 
-        Component.__init__(self, (w, h), coord=coord, autocreate=autooutline)
+        Component.__init__(self, (w, h), coord=coord, autooutline=autooutline)
         self.name = 'angle'
 
     def create(self):

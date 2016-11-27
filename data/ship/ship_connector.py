@@ -89,24 +89,18 @@ class ShipConnector(PixelMap):
         # check if there are more chunks
         # repeat until all one chunk
 
-        self.print_map()
-
         connected = False
         while not connected:
-            print 'connecting'
             chunk1, chunk2 = self.get_two_chunks(self.centers)
 
             intersected = False
             while not intersected:
-                print 'moving together'
                 intersected = self.move_chunks_together(chunk1, chunk2)
 
-            print 'intersected'
             self.save_points()
             self.reset_chunks()
 
             if self.num == 1:
-                print 'fully connected'
                 connected = True
 
     def save_points(self):
@@ -123,8 +117,6 @@ class ShipConnector(PixelMap):
         self.chunk_ids = range(1, self.num + 1)
         self.chunks = self.get_chunks()
         self.centers = self.get_chunk_centers()
-        print self.num
-        self.print_map()
 
     def get_chunk_centers(self):
 
@@ -132,7 +124,6 @@ class ShipConnector(PixelMap):
 
         for n in self.chunk_ids:
             centers[n] = self.get_center(self.chunks[n])
-            print centers[n]
 
         return centers
 
