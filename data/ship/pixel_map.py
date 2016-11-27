@@ -196,7 +196,7 @@ class PixelMap(object):
         map[x][y] = value
         if value == -1:
             edges.add((x, y))
-        elif value == 1:
+        elif value >= 1:
             points.add((x, y))
 
     def modify_map(self, mod_func, row_col_func, new, rev=False, rotate=False):

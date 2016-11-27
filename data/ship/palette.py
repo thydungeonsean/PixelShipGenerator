@@ -18,11 +18,11 @@ class Palette(object):
 
     def __init__(self):
 
-        self.basic = randint(2, 6)
-        self.connector = randint(0, 2)
-        self.angles = randint(0, 0)
-        self.curves = randint(0, 0)
-        self.special = randint(0, 1)
+        self.basic = randint(4, 12)
+        self.connector = randint(0, 4)
+        self.angles = randint(0, 1)
+        self.curves = randint(0, 1)
+        self.special = randint(0, 2)
 
         self.component_list = self.set_component_list()
 

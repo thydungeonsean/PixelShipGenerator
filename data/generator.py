@@ -47,6 +47,10 @@ class Generator(State):
         self.selection_grid = self.set_selection_grid()
         self.selector, self.selrect = self.set_selector()
 
+        self.saved_grid = self.set_saved_grid()
+        self.saved_icon = pygame.image.load('assets/saved.png')
+        self.saved_rect = self.saved_icon.get_rect()
+
         self.buttons = self.set_buttons()
 
         self.show_frame = False
@@ -71,6 +75,15 @@ class Generator(State):
 
         return sel
 
+    def set_saved_grid(self):
+
+        saved = {}
+
+        for point in self.point_ref.keys():
+            saved[point] = False
+
+        return saved
+
     def set_point_ref(self):
 
         points = {}
@@ -94,6 +107,11 @@ class Generator(State):
 
         return ship_grid
 
+    def draw_saved_icon(self, surface, (px, py)):
+
+        self.saved_rect.topleft = (px, py)
+        surface.blit(self.saved_icon, self.saved_rect)
+
     def draw(self, surface):
 
         for (x, y), ship in self.ship_grid.items():
@@ -103,6 +121,9 @@ class Generator(State):
             i, r = ship.get_image(self.show_frame, self.show_spine)
             r.topleft = point
             surface.blit(i, r)
+
+            if self.saved_grid[(x, y)]:
+                self.draw_saved_icon(surface, point)
 
         for button in self.buttons:
             button.draw(surface)
@@ -209,6 +230,7 @@ class Generator(State):
 
                     i, r = ship.get_image()
                     pygame.image.save(i, filename)
+                    self.saved_grid[point] = True
 
     def transform(self, method):
 
@@ -217,6 +239,7 @@ class Generator(State):
                 ship = self.ship_grid[point]
                 ship.transform(method)
                 ship.update_image()
+                self.saved_grid[point] = False
 
     def set_buttons(self):
 
@@ -275,6 +298,7 @@ class Generator(State):
         ship = self.generate_ship()
 
         self.ship_grid[point] = ship
+        self.saved_grid[point] = False
 
     def toggle_generate_mode(self):
 

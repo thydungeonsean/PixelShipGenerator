@@ -47,15 +47,15 @@ class Ship(PixelMap):
     # TODO - find a non messy way to move this function into class
     count = set_ship_count()
 
-    @staticmethod
-    def set_random_color():
-
-        r = randint(0, 255)
-        g = randint(0, 255)
-        b = randint(0, 255)
-
-        return r, g, b
-        # return RED
+    # @staticmethod
+    # def set_random_color():
+    #
+    #     r = randint(0, 255)
+    #     g = randint(0, 255)
+    #     b = randint(0, 255)
+    #
+    #     return r, g, b
+    #     # return RED
 
     def __init__(self, (w, h), animating=False, grid_coord=(0, 0)):
 
@@ -89,6 +89,7 @@ class Ship(PixelMap):
             return
         self._transform(method)
         self.update_id()
+        #self.center_ship()
 
     def center_ship(self, update=True):
 
@@ -388,6 +389,3 @@ class Ship(PixelMap):
             connector.connect_chunks()
             self.copy(connector)
             self.update_image()
-
-
-
