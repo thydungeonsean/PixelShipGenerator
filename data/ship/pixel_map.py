@@ -15,7 +15,7 @@ class PixelMap(object):
 
         self.image = None
         self.rect = None
-        self.color = None
+        self.color = BLUE
         self.fill_color = BLACK
         self.colorkey = colorkey
 
@@ -51,6 +51,9 @@ class PixelMap(object):
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+    def position(self, (x, y)):
+        self.rect.topleft = (x, y)
 
     # for debugging
     def print_map(self):
