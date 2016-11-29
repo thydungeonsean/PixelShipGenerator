@@ -4,6 +4,7 @@ from pixel_map import PixelMap
 from ..constants import *
 from frame import Frame
 from palette import Palette
+from mirror import Mirror
 import component_placer as cp
 import ship_connector as sc
 import os
@@ -72,6 +73,8 @@ class Ship(PixelMap):
         self.frame = self.set_frame()
         self.spine = self.frame.spine
         self.palette = Palette()
+
+        self.mirror = self.set_mirror()
 
         # conformity is percentage of tiles per component that should be in frame
         self.conformity = .55
@@ -164,6 +167,34 @@ class Ship(PixelMap):
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
 
+    def set_mirror(self):
+
+        # TODO algo to see if frame is good for mirroring
+        mirror_able = True
+
+        if mirror_able:
+            m = randint(0, 99)
+            if m < 65:
+                return None
+            elif m < 70:
+                return Mirror.get_mirror(self, 'horizontal_a')
+            elif m < 75:
+                return Mirror.get_mirror(self, 'horizontal_b')
+            elif m < 80:
+                return Mirror.get_mirror(self, 'vertical_a')
+            elif m < 87:
+                return Mirror.get_mirror(self, 'vertical_b')
+            elif m < 94:
+                return Mirror.get_mirror(self, 'quad_tl')
+            elif m < 96:
+                return Mirror.get_mirror(self, 'quad_tr')
+            elif m < 98:
+                return Mirror.get_mirror(self, 'quad_bl')
+            elif m < 100:
+                return Mirror.get_mirror(self, 'quad_br')
+        else:
+            return None
+
     # image methods
     def get_image(self, frame=False, spine=False):
 
@@ -241,6 +272,9 @@ class Ship(PixelMap):
         self.check_connected()
 
         self.center_ship(update=False)
+
+        if self.mirror is not None:
+            self.mirror.run()
 
     # component adding methods
     def attach(self, component):
