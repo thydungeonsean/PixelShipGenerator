@@ -174,6 +174,7 @@ class Ship(PixelMap):
 
         if mirror_able:
             m = randint(0, 99)
+            m = randint(87, 99)
             if m < 65:
                 return None
             elif m < 70:
