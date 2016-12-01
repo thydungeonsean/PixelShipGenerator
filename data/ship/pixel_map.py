@@ -109,13 +109,15 @@ class PixelMap(object):
         else:
             return False
 
-    def get_adj(self, (x, y)):
+    def get_adj(self, (x, y), diag=False):
 
         raw_adj = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
-        adj = set()
+        if diag:
+            raw_adj.extend([(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)])
+        adj = []
         for p in raw_adj:
             if self.is_on_map(p):
-                adj.add(p)
+                adj.append(p)
 
         return adj
 
@@ -249,3 +251,4 @@ class PixelMap(object):
         for y in r:
             col.append((x, y))
         return col
+

@@ -103,19 +103,20 @@ class Mirror(PixelMap):
         elif axis == 'hor':
             add_reflected_point = self.add_horizontal_reflected_point
 
-        ship_points = []
+        edges = []
 
         for y in rows:
             for x in columns:
                 value = target_map.map[x][y]
                 self.add_point((x, y), value)
                 if value != 0:
-                    ship_points.append((x, y))
+                    edges.append((x, y))
 
         # TODO have something that tests if this is a valid reflection
         # don't want single pixel ships making it through too much
-        final_points = self.trim_outliers(ship_points)
+        final_points = self.trim_outliers(edges)
 
+        #final_points = ship_points
         for (x, y) in final_points:
             value = self.map[x][y]
             add_reflected_point((x, y), value, line)
@@ -190,9 +191,23 @@ class Mirror(PixelMap):
         self.add_point((new_x, y), value)
 
     def trim_outliers(self, points):
+        
+        initial_points = set(points)
+        valid_points = set()
 
-        final_points = []
+        for x, y in points:
+            
+            adj = self.get_adj((x, y), diag=True)
+            
+            for ax, ay in adj:
+                if self.map[ax][ay] >= 1:
+                    valid_points.add((x, y))
+                    break
 
+        remove_points = list(initial_points.difference(valid_points))
+        
+        for point in remove_points:
+            self.trim_point(point)
 
+        return list(valid_points)
 
-        return final_points

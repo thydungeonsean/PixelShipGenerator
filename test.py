@@ -13,9 +13,13 @@ from random import *
 screen = pygame.display.get_surface()
 
 uss = ship.Ship((50, 50))
+sc = scan.ScanOutline(uss)
 
 
+uss.position((10, 10))
+sc.position((10, 10))
 uss.draw(screen)
+sc.draw(screen)
 
 pygame.display.update()
 
@@ -25,5 +29,4 @@ while not end:
         end = True
 
 pygame.quit()
-
 

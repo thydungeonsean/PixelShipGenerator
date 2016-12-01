@@ -7,8 +7,8 @@ class ScanOutline(PixelMap):
     def __init__(self, ship):
 
         self.ship = ship
-        w = self.ship.w + 2
-        h = self.ship.h + 2
+        w = self.ship.w + 4
+        h = self.ship.h + 4
         PixelMap.__init__(self, (w, h), colorkey=True)
         self.fill_color = WHITE
 
@@ -33,7 +33,8 @@ class ScanOutline(PixelMap):
             self.trim_point((x, y))
 
     def position(self, (x, y)):
-        self.rect.topleft = (x-SCALE, y-SCALE)
+        self.rect.topleft = (x, y)
+        self.rect.topleft = (x+scale(2), y+scale(2))
 
     def flood_find_outer_edge(self, p_map=None):
 
@@ -49,7 +50,7 @@ class ScanOutline(PixelMap):
 
     def flood(self, queue, edge, visited, p_map=None):
 
-        mod = 1
+        mod = 2
         if p_map is None:
             p_map = self
             mod = 0
