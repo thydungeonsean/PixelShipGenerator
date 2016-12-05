@@ -11,15 +11,14 @@ from random import *
 
 
 screen = pygame.display.get_surface()
-
+sd=342968604
 uss = ship.Ship((50, 50))
 sc = scan.ScanOutline(uss)
-
 
 uss.position((10, 10))
 sc.position((10, 10))
 uss.draw(screen)
-sc.draw(screen)
+sc.animate_trace()
 
 pygame.display.update()
 

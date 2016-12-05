@@ -252,3 +252,13 @@ class PixelMap(object):
             col.append((x, y))
         return col
 
+    def get_total_points(self, return_type='set'):
+
+        points = set()
+        points.update(self.points)
+        points.update(self.edges)
+
+        if return_type == 'list':
+            return list(points)
+        elif return_type == 'set':
+            return points

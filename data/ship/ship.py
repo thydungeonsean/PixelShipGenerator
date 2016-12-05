@@ -58,16 +58,27 @@ class Ship(PixelMap):
     #     return r, g, b
     #     # return RED
 
-    def __init__(self, (w, h), animating=False, grid_coord=(0, 0)):
+    @staticmethod
+    def standard_seed():
+        return randint(0, 1000000000)
+
+    def __init__(self, (w, h), animating=False, grid_coord=(0, 0), sd='standard'):
+
+        if sd == 'standard':
+            self.seed = self.standard_seed()
+        else:
+            self.seed = sd
+        seed(self.seed)
 
         self.ship_id = str(Ship.count)
         Ship.count += 1
         self.grid_coord = grid_coord
 
-        PixelMap.__init__(self, (w, h))
+        PixelMap.__init__(self, (w, h), colorkey=False)
 
         self.color_palette = self.set_color_palette()
         self.color = self.color_palette.base
+        self.fill_color=BLACK
         self.mono = False
 
         self.frame = self.set_frame()
@@ -105,7 +116,8 @@ class Ship(PixelMap):
         move_mod = (map_center[0]-center_point[0], map_center[1]-center_point[1])
         self.shift_map(move_mod)
 
-        self.update_image()
+        if update:
+            self.update_image()
 
     def shift_map(self, (mx, my)):
 
@@ -174,7 +186,7 @@ class Ship(PixelMap):
 
         if mirror_able:
             m = randint(0, 99)
-            #m = randint(87, 99)
+            # m = randint(87, 99)
             if m < 65:
                 return None
             elif m < 70:

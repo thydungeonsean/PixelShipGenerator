@@ -123,9 +123,7 @@ class Mirror(PixelMap):
 
     def get_ship_points(self):
 
-        points = set()
-        points.update(self.ship.points)
-        points.update(self.ship.edges)
+        points = self.ship.get_total_points()
 
         return points
 
