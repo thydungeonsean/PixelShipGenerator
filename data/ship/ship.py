@@ -4,7 +4,7 @@ from pixel_map import PixelMap
 from ..constants import *
 from frame import Frame
 from palette import Palette
-from mirror import Mirror
+from mirror import Mirror, RevertBackup
 import component_placer as cp
 import ship_connector as sc
 import os
@@ -48,16 +48,6 @@ class Ship(PixelMap):
     # TODO - find a non messy way to move this function into class
     count = set_ship_count()
 
-    # @staticmethod
-    # def set_random_color():
-    #
-    #     r = randint(0, 255)
-    #     g = randint(0, 255)
-    #     b = randint(0, 255)
-    #
-    #     return r, g, b
-    #     # return RED
-
     @staticmethod
     def standard_seed():
         return randint(0, 1000000000)
@@ -78,14 +68,14 @@ class Ship(PixelMap):
 
         self.color_palette = self.set_color_palette()
         self.color = self.color_palette.base
-        self.fill_color=BLACK
+        self.fill_color = BLACK
         self.mono = False
 
         self.frame = self.set_frame()
         self.spine = self.frame.spine
         self.palette = Palette()
 
-        self.mirror = self.set_mirror()
+        self.mirror, self.mirrored = self.set_initial_mirror()
 
         # conformity is percentage of tiles per component that should be in frame
         self.conformity = .55
@@ -95,6 +85,10 @@ class Ship(PixelMap):
         self.points_in_frame = 0
 
         self.generate_ship(animating)
+        self.backup = RevertBackup(self, self.map, self.points, self.edges)
+
+        if self.mirrored is not None:
+            self.mirror.run()
 
         self.image, self.rect = self.set_image()
 
@@ -179,7 +173,7 @@ class Ship(PixelMap):
         # return Frame.preselected(self, 'talon')
         # return Frame.random(self)
 
-    def set_mirror(self):
+    def set_initial_mirror(self):
 
         # TODO algo to see if frame is good for mirroring
         mirror_able = True
@@ -188,25 +182,25 @@ class Ship(PixelMap):
             m = randint(0, 99)
             # m = randint(87, 99)
             if m < 65:
-                return None
+                return None, None
             elif m < 70:
-                return Mirror.get_mirror(self, 'horizontal_a')
+                return Mirror.get_mirror(self, 'horizontal_a'), 'mirrorha'
             elif m < 75:
-                return Mirror.get_mirror(self, 'horizontal_b')
+                return Mirror.get_mirror(self, 'horizontal_b'), 'mirrorhb'
             elif m < 80:
-                return Mirror.get_mirror(self, 'vertical_a')
+                return Mirror.get_mirror(self, 'vertical_a'), 'mirrorva'
             elif m < 87:
-                return Mirror.get_mirror(self, 'vertical_b')
+                return Mirror.get_mirror(self, 'vertical_b'), 'mirrorvb'
             elif m < 94:
-                return Mirror.get_mirror(self, 'quad_tl')
+                return Mirror.get_mirror(self, 'quad_tl'), 'mirrortl'
             elif m < 96:
-                return Mirror.get_mirror(self, 'quad_tr')
+                return Mirror.get_mirror(self, 'quad_tr'), 'mirrortr'
             elif m < 98:
-                return Mirror.get_mirror(self, 'quad_bl')
+                return Mirror.get_mirror(self, 'quad_bl'), 'mirrorbl'
             elif m < 100:
-                return Mirror.get_mirror(self, 'quad_br')
+                return Mirror.get_mirror(self, 'quad_br'), 'mirrorbr'
         else:
-            return None
+            return None, None
 
     # image methods
     def get_image(self, frame=False, spine=False):
@@ -285,9 +279,6 @@ class Ship(PixelMap):
         self.check_connected()
 
         self.center_ship(update=False)
-
-        if self.mirror is not None:
-            self.mirror.run()
 
     # component adding methods
     def attach(self, component):
@@ -384,7 +375,7 @@ class Ship(PixelMap):
     # for debugging
     def animate(self, component):
 
-        self.update_image(self.color)
+        self.update_image()
         sx, sy = self.get_grid_coord()
         self.rect.topleft = (sx, sy)
         screen = pygame.display.get_surface()
@@ -458,3 +449,12 @@ class Ship(PixelMap):
             connector.connect_chunks()
             self.copy(connector)
             self.update_image()
+
+    # revert ship from mirrored state to original
+    def revert(self):
+        if self.mirrored is None:
+            return
+
+        self.backup.over_write()
+        self.mirrored = None
+        self.update_id()

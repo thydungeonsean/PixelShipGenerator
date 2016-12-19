@@ -2,6 +2,7 @@ from constants import *
 from ship.ship import Ship
 from state import State
 from button import Button
+from ship.mirror import Mirror
 import os
 
 
@@ -253,6 +254,51 @@ class Generator(State):
     def counter_clockwise(self):
         self.transform('counter_clockwise')
 
+    def mirror(self, mtype, mid):
+        for point in self.selection_grid.keys():
+            if self.selection_grid[point]:
+                ship = self.ship_grid[point]
+                if ship.mirrored is not None:
+                    ship.revert()
+                mir = Mirror.get_mirror(ship, mtype)
+                mir.run()
+                ship.mirrored = mid
+                ship.update_image()
+                ship.update_id()
+                self.saved_grid[point] = False
+
+    def mirror_va(self):
+        self.mirror('vertical_a', 'mirrorva')
+
+    def mirror_vb(self):
+        self.mirror('vertical_b', 'mirrorvb')
+
+    def mirror_ha(self):
+        self.mirror('horizontal_a', 'mirrorha')
+
+    def mirror_hb(self):
+        self.mirror('horizontal_b', 'mirrorhb')
+
+    def mirror_tl(self):
+        self.mirror('quad_tl', 'mirrortl')
+
+    def mirror_tr(self):
+        self.mirror('quad_tr', 'mirrortr')
+
+    def mirror_bl(self):
+        self.mirror('quad_bl', 'mirrorbl')
+
+    def mirror_br(self):
+        self.mirror('quad_br', 'mirrorbr')
+
+    def revert(self):
+        for point in self.selection_grid.keys():
+            if self.selection_grid[point]:
+                ship = self.ship_grid[point]
+                ship.revert()
+                ship.update_image()
+                self.saved_grid[point] = False
+
     def set_buttons(self):
 
         bw = 78
@@ -268,6 +314,15 @@ class Generator(State):
                    Button('fliph', (4*bw+3*sbw, 0), self.hor_flip),
                    Button('color_rand', (4*bw + 4*sbw, 0), self.reset_color_palette),
                    Button('color_mono_vary', (4*bw + 5*sbw, 0), self.toggle_mono),
+                   Button('mirrorva', (4*bw + 7*sbw, 0), self.mirror_va),
+                   Button('mirrorvb', (4 * bw + 8 * sbw, 0), self.mirror_vb),
+                   Button('mirrorha', (4 * bw + 9 * sbw, 0), self.mirror_ha),
+                   Button('mirrorhb', (4 * bw + 10 * sbw, 0), self.mirror_hb),
+                   Button('mirrortl', (4 * bw + 11 * sbw, 0), self.mirror_tl),
+                   Button('mirrortr', (4 * bw + 12 * sbw, 0), self.mirror_tr),
+                   Button('mirrorbl', (4 * bw + 13 * sbw, 0), self.mirror_bl),
+                   Button('mirrorbr', (4 * bw + 14 * sbw, 0), self.mirror_br),
+                   Button('unmirror', (4*bw + 15*sbw, 0), self.revert),
                    Button('i', (SCREENWIDTH-24, 0), self.main.show_instructions)]
 
         return buttons

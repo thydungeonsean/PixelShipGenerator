@@ -176,6 +176,7 @@ class ScanOutline(PixelMap):
         r = dot.get_rect()
 
         for i in range(len(self.trace)+20):
+        #for i in range(20):
 
             if i < len(self.trace):
                 self.draw_points(self.trace[i], dot1, r, screen)

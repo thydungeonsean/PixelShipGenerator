@@ -209,3 +209,33 @@ class Mirror(PixelMap):
 
         return list(valid_points)
 
+
+class RevertBackup(PixelMap):
+
+    def __init__(self, ship, map, points, edges):
+
+        w = len(map[0])
+        h = len(map)
+        PixelMap.__init__(self, (w, h))
+        self.ship = ship
+
+        self.map = self.copy_map(map)
+        self.points = points.copy()
+        self.edges = edges.copy()
+
+    def copy_map(self, m):
+
+        map = []
+        for x in range(self.w):
+            r = []
+            for y in range(self.h):
+                r.append(m[x][y])
+            map.append(r)
+
+        return map
+
+    def over_write(self):
+
+        self.ship.points = self.points
+        self.ship.edges = self.edges
+        self.ship.map = self.map
